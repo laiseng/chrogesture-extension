@@ -8,16 +8,22 @@ export enum GestureTypes {
     Right
 }
 
-const minLength=20;
+const minLength = 20;
 export class CGesture {
     start: Coordinate;
     end: Coordinate;
 
-    
+
 
     constructor() {
         this.doResponse();
 
+        document.addEventListener('contextmenu', e => {
+            if (this.start) {
+                this.start = null;
+                e.preventDefault();
+            }
+        })
         document.addEventListener('mousedown', e => {
             //right button
             if (e.button == 2) {
