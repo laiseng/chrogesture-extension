@@ -8,9 +8,12 @@ export enum GestureTypes {
     Right
 }
 
+const minLength=20;
 export class CGesture {
     start: Coordinate;
     end: Coordinate;
+
+    
 
     constructor() {
         this.doResponse();
@@ -32,10 +35,8 @@ export class CGesture {
     }
 
     calculateVector(start: Coordinate, end: Coordinate) {
-        let delta = "100px;"
-        let minLength = 50;
         var deg = Math.atan2(start.y - end.y, start.x - end.x) * 180 / Math.PI;
-        if (Math.sqrt(Math.pow(start.x - end.x, 2) + Math.pow(start.y - end.y, 2)) > 50) {
+        if (Math.sqrt(Math.pow(start.x - end.x, 2) + Math.pow(start.y - end.y, 2)) > minLength) {
             console.log("Deg", deg);
             if (deg > -30 && deg < 30) {
                 console.log("gesture", "left");
