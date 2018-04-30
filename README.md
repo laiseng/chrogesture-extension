@@ -1,2 +1,1 @@
-# cgesture
-Right button Up, Down, Left, Right gesture tabs control
+# chrome-bookmarks-queue
