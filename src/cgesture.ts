@@ -44,14 +44,12 @@ export class CGesture {
             filter<MouseEvent>(e => e.button == 2),
             switchMap(e => move$)
         ).subscribe(e => {
-            this.inGesture = true;
             // this.addDot(e);
             let currentCoordinate = this.getCoordinate(e);
-            if (!this.anchorCoordinate) {
-                this.anchorCoordinate = this.getCoordinate(e);
-            }
+            if (!this.anchorCoordinate) { this.anchorCoordinate = currentCoordinate; }
 
             if (this.getDistance(this.anchorCoordinate, currentCoordinate) > MIN_LENGTH) {
+                this.inGesture = true;
                 let vector = this.getVector(this.getDegrees(this.anchorCoordinate, currentCoordinate));
                 if (vector != null) {
                     if ((this.gestures.length > 0 && this.gestures[this.gestures.length - 1] != vector) || this.gestures.length == 0) {
