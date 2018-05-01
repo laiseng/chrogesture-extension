@@ -15,8 +15,6 @@ export enum GestureTypes {
 
 const MIN_LENGTH = 20;
 export class CGesture {
-    title = 'app';
-    count = 0;
     inGesture = false;
     gestures: GestureTypes[] = [];
     anchorCoordinate: Coordinate;
@@ -35,7 +33,6 @@ export class CGesture {
                     this.anchorCoordinate = null;
                     chrome.runtime.sendMessage({ gestures: this.gestures } as Gestures);
                     this.gestures = [];
-
                 })
             )));
 
@@ -43,7 +40,6 @@ export class CGesture {
         fromEvent<MouseEvent>(document, 'mousedown').pipe(
             tap(e => {
                 e.button == 0 ? this.inGesture = false : null;
-                document.title = 'tapping ' + e.clientX + ', ' + e.clientY;
             }),
             filter<MouseEvent>(e => e.button == 2),
             switchMap(e => move$)
