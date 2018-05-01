@@ -49,7 +49,7 @@ export class CGesture {
             switchMap(e => move$)
         ).subscribe(e => {
             this.inGesture = true;
-            this.addDot(e);
+            // this.addDot(e);
             let currentCoordinate = this.getCoordinate(e);
             if (!this.anchorCoordinate) {
                 this.anchorCoordinate = this.getCoordinate(e);

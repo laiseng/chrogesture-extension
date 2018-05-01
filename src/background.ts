@@ -10,10 +10,6 @@ chrome.runtime.onMessage.addListener((message: Gestures, sender, sendResponse: F
         chrome.tabs.create({ url: 'chrome://newtab' });
     }
 
-    if (message.gestures == [GestureTypes.Left]) {
-
-    }
-
     if (arraysEqual(message.gestures, [GestureTypes.Up, GestureTypes.Down])) {
         // chrome.history.
         chrome.sessions.restore();
