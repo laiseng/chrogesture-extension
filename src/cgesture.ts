@@ -1,6 +1,11 @@
 
-export interface Coordinate { x: number, y: number }
+import { fromEvent, merge, concat } from 'rxjs';
+import { switchMap, tap, takeUntil, filter } from 'rxjs/operators';
 
+export interface Coordinate { x: number, y: number }
+export class Gestures {
+    gestures: GestureTypes[];
+}
 export enum GestureTypes {
     Up,
     Down,
@@ -8,72 +13,106 @@ export enum GestureTypes {
     Right
 }
 
-const minLength = 20;
+const MIN_LENGTH = 20;
 export class CGesture {
-    start: Coordinate;
-    end: Coordinate;
-
-
-
+    title = 'app';
+    count = 0;
+    inGesture = false;
+    gestures: GestureTypes[] = [];
+    anchorCoordinate: Coordinate;
     constructor() {
-        this.doResponse();
 
-        document.addEventListener('contextmenu', e => {
-            if (this.start) {
-                this.start = null;
+        fromEvent(document, 'contextmenu').subscribe(e => {
+            if (this.inGesture) {
                 e.preventDefault();
             }
-        })
-        document.addEventListener('mousedown', e => {
-            //right button
-            if (e.button == 2) {
-                this.start = this.getCoordinate(e);
-            }
-        })
-
-        document.addEventListener('mouseup', e => {
-            //right button
-            if (e.button == 2) {
-                this.end = this.getCoordinate(e);
-                this.calculateVector(this.start, this.end);
-            }
+            this.inGesture = false;
         });
-    }
 
-    calculateVector(start: Coordinate, end: Coordinate) {
-        var deg = Math.atan2(start.y - end.y, start.x - end.x) * 180 / Math.PI;
-        if (Math.sqrt(Math.pow(start.x - end.x, 2) + Math.pow(start.y - end.y, 2)) > minLength) {
-            console.log("Deg", deg);
-            if (deg > -30 && deg < 30) {
-                console.log("gesture", "left");
-                this.sendMessage(GestureTypes.Left);
-                window.history.back();
-            } else if (deg > 60 && deg < 120) {
-                console.log("gesture", "up");
-                this.sendMessage(GestureTypes.Up);
-            } else if (deg > -120 && deg < -60) {
-                console.log("gesture", "down");
-                this.sendMessage(GestureTypes.Down);
-            } else if (deg > 150 || deg < -150) {
-                console.log("gesture", "right");
-                this.sendMessage(GestureTypes.Right);
-                window.history.forward();
+        let move$ = fromEvent<MouseEvent>(document, 'mousemove').pipe(
+            takeUntil(fromEvent(document, 'mouseup').pipe(
+                tap(e => {
+                    this.anchorCoordinate = null;
+                    chrome.runtime.sendMessage({ gestures: this.gestures } as Gestures);
+                    this.gestures = [];
+
+                })
+            )));
+
+
+        fromEvent<MouseEvent>(document, 'mousedown').pipe(
+            tap(e => {
+                e.button == 0 ? this.inGesture = false : null;
+                document.title = 'tapping ' + e.clientX + ', ' + e.clientY;
+            }),
+            filter<MouseEvent>(e => e.button == 2),
+            switchMap(e => move$)
+        ).subscribe(e => {
+            this.inGesture = true;
+            this.addDot(e);
+            let currentCoordinate = this.getCoordinate(e);
+            if (!this.anchorCoordinate) {
+                this.anchorCoordinate = this.getCoordinate(e);
             }
-        } else {
-            this.start = null;
-            console.log("not long enough")
-        }
-    }
 
-    doResponse() {
-        console.log("start cgesture")
-    }
+            if (this.getDistance(this.anchorCoordinate, currentCoordinate) > MIN_LENGTH) {
+                let vector = this.getVector(this.getDegrees(this.anchorCoordinate, currentCoordinate));
+                if (vector != null) {
+                    if ((this.gestures.length > 0 && this.gestures[this.gestures.length - 1] != vector) || this.gestures.length == 0) {
+                        this.gestures.push(vector);
+                    }
+                    this.anchorCoordinate = currentCoordinate;
+                }
+            }
+        })
 
+
+    }
     getCoordinate(e: MouseEvent): Coordinate {
         return { x: e.clientX, y: e.clientY };
     }
 
-    sendMessage(direction: GestureTypes) {
-        chrome.runtime.sendMessage({ direction: direction });
+    getDistance(start: Coordinate, end: Coordinate) {
+        return Math.sqrt(Math.pow(start.x - end.x, 2) + Math.pow(start.y - end.y, 2));
+    }
+
+    getDegrees(start: Coordinate, end: Coordinate) {
+        return Math.atan2(start.y - end.y, start.x - end.x) * 180 / Math.PI;
+    }
+
+    getVector(deg: number) {
+        if (deg > -30 && deg < 30) {
+            console.log("gesture", "left");
+            window.history.back();
+            return GestureTypes.Left;
+        } else if (deg > 60 && deg < 120) {
+            console.log("gesture", "up");
+            return GestureTypes.Up;
+        } else if (deg > -120 && deg < -60) {
+            console.log("gesture", "down");
+            return GestureTypes.Down;
+        } else if (deg > 150 || deg < -150) {
+            console.log("gesture", "right");
+            window.history.forward();
+            return GestureTypes.Right;
+        }
+        console.log("undefined");
+    }
+
+    getVectorText() {
+        return this.gestures.map(x => {
+            return GestureTypes[x];
+        })
+    }
+    addDot(e: MouseEvent) {
+        let div = document.createElement('div');
+        div.style.position = 'absolute';
+        div.style.left = e.clientX + 'px';
+        div.style.top = e.clientY + 'px';
+        div.style.width = '3px';
+        div.style.height = '3px';
+        div.style.backgroundColor = e.button == 0 ? 'red' : 'green';
+        document.body.appendChild(div);
+
     }
 }

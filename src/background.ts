@@ -1,27 +1,35 @@
-import { GestureTypes } from "./cgesture";
+import { GestureTypes, Gestures } from "./cgesture";
 
-// function polling() {
-//     console.log('polling');
-//     setTimeout(polling, 1000 * 30);
-// }
+chrome.runtime.onMessage.addListener((message: Gestures, sender, sendResponse: Function) => {
 
-// polling();
+    if (arraysEqual(message.gestures, [GestureTypes.Down])) {
+        chrome.tabs.remove(sender.tab.id);
+    }
 
+    if (arraysEqual(message.gestures, [GestureTypes.Up])) {
+        chrome.tabs.create({ url: 'chrome://newtab' });
+    }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse: Function) => {
-    let direction = message.direction as GestureTypes;
-    switch (direction) {
-        case GestureTypes.Up:
-            chrome.tabs.create({ url: 'chrome://newtab' });
-            break;
-        case GestureTypes.Down:
-            chrome.tabs.remove(sender.tab.id);
-            break;
-        case GestureTypes.Left:
-            break;
-        case GestureTypes.Right:
-            break;
-        default:
-            break;
+    if (message.gestures == [GestureTypes.Left]) {
+
+    }
+
+    if (arraysEqual(message.gestures, [GestureTypes.Up, GestureTypes.Down])) {
+        // chrome.history.
+        chrome.sessions.restore();
+        console.log("updown triggered -undo close tab");
     }
 })
+
+function arraysEqual(a, b) {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+
+    // If you don't care about the order of the elements inside
+    // the array, you should sort both arrays here.
+    for (var i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
+}

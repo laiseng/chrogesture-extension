@@ -29,6 +29,8 @@
   "permissions": [
     "storage",
     "tabs",
+    "sessions",
+    "history",
     "<all_urls>"
   ]
 }
