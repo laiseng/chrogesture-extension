@@ -9,7 +9,14 @@ chrome.runtime.onMessage.addListener((message: Gestures, sender, sendResponse: F
     if (arraysEqual(message.gestures, [GestureTypes.Up])) {
         chrome.tabs.create({ url: 'chrome://newtab' });
     }
-
+    
+    if (arraysEqual(message.gestures, [GestureTypes.Left])) {
+        chrome.tabs.executeScript(null,{"code": "window.history.back()"});
+    }
+    
+    if (arraysEqual(message.gestures, [GestureTypes.Right])) {
+        chrome.tabs.executeScript(null,{"code": "window.history.forward()"});
+    }
     if (arraysEqual(message.gestures, [GestureTypes.Up, GestureTypes.Down])) {
         // chrome.history.
         chrome.sessions.restore();

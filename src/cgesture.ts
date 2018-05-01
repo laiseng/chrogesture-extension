@@ -79,7 +79,7 @@ export class CGesture {
     getVector(deg: number) {
         if (deg > -30 && deg < 30) {
             console.log("gesture", "left");
-            window.history.back();
+            // window.history.back();
             return GestureTypes.Left;
         } else if (deg > 60 && deg < 120) {
             console.log("gesture", "up");
@@ -89,7 +89,7 @@ export class CGesture {
             return GestureTypes.Down;
         } else if (deg > 150 || deg < -150) {
             console.log("gesture", "right");
-            window.history.forward();
+            // window.history.forward();
             return GestureTypes.Right;
         }
         console.log("undefined");
