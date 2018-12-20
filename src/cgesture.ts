@@ -18,49 +18,18 @@ export class CGesture {
   inGesture = false;
   gestures: GestureTypes[] = [];
   anchorCoordinate: Coordinate;
-  constructor() {
-
-    fromEvent(document, 'contextmenu').subscribe(e => {
-      if (this.inGesture) {
-        e.preventDefault();
-      }
-      this.inGesture = false;
-    });
-
-    let move$ = fromEvent<MouseEvent>(document, 'mousemove').pipe(
-      takeUntil(fromEvent(document, 'mouseup').pipe(
-        tap(e => {
-          this.anchorCoordinate = null;
-          chrome.runtime.sendMessage({ gestures: this.gestures } as Gestures);
-          this.gestures = [];
-        })
-      )));
-
-
-    fromEvent<MouseEvent>(document, 'mousedown').pipe(
+  mouseMoveEvent$ = fromEvent<MouseEvent>(document, 'mousemove').pipe(
+    takeUntil(fromEvent(document, 'mouseup').pipe(
       tap(e => {
-        e.button == 0 ? this.inGesture = false : null;
-      }),
-      filter<MouseEvent>(e => e.button == 2),
-      switchMap(e => move$)
-    ).subscribe(e => {
-      // this.addDot(e);
-      let currentCoordinate = this.getCoordinate(e);
-      if (!this.anchorCoordinate) { this.anchorCoordinate = currentCoordinate; }
+        this.anchorCoordinate = null;
+        chrome.runtime.sendMessage({ gestures: this.gestures } as Gestures);
+        this.gestures = [];
+      })
+    )));
 
-      if (this.getDistance(this.anchorCoordinate, currentCoordinate) > MIN_LENGTH) {
-        this.inGesture = true;
-        let vector = this.getVector(this.getDegrees(this.anchorCoordinate, currentCoordinate));
-        if (vector != null) {
-          if ((this.gestures.length > 0 && this.gestures[this.gestures.length - 1] != vector) || this.gestures.length == 0) {
-            this.gestures.push(vector);
-          }
-          this.anchorCoordinate = currentCoordinate;
-        }
-      }
-    })
-
-    this.setIFrameMouseEventBorderStyle();
+  constructor() {
+    this.listenToMouseDownGesture(document);
+    document.querySelectorAll('iframe').forEach(iframe => iframe.contentDocument ? this.listenToMouseDownGesture(iframe.contentDocument) : null);
   }
 
   getCoordinate(e: MouseEvent): Coordinate {
@@ -99,6 +68,24 @@ export class CGesture {
       return GestureTypes[x];
     })
   }
+
+  calculateVectorCoordinates(e: MouseEvent) {
+    // this.addDot(e);
+    let currentCoordinate = this.getCoordinate(e);
+    if (!this.anchorCoordinate) { this.anchorCoordinate = currentCoordinate; }
+
+    if (this.getDistance(this.anchorCoordinate, currentCoordinate) > MIN_LENGTH) {
+      this.inGesture = true;
+      let vector = this.getVector(this.getDegrees(this.anchorCoordinate, currentCoordinate));
+      if (vector != null) {
+        if ((this.gestures.length > 0 && this.gestures[this.gestures.length - 1] != vector) || this.gestures.length == 0) {
+          this.gestures.push(vector);
+        }
+        this.anchorCoordinate = currentCoordinate;
+      }
+    }
+  }
+
   addDot(e: MouseEvent) {
     let div = document.createElement('div');
     div.style.position = 'absolute';
@@ -111,7 +98,21 @@ export class CGesture {
 
   }
 
-  setIFrameMouseEventBorderStyle() {
+  listenToMouseDownGesture(element: Node) {
+    fromEvent(element, 'contextmenu').subscribe(e => {
+      if (this.inGesture) {
+        e.preventDefault();
+      }
+      this.inGesture = false;
+    });
+
+    fromEvent<MouseEvent>(element, 'mousedown').pipe(
+      tap(e => { e.button == 0 ? this.inGesture = false : null; console.log('mousedown', element) }),
+      filter<MouseEvent>(e => e.button == 2),
+      switchMap(e => this.mouseMoveEvent$)
+    ).subscribe(e => {
+      this.calculateVectorCoordinates(e);
+    })
     // document.querySelectorAll('iframe').forEach((frame: HTMLIFrameElement) => {
     //   console.log('add iframe style to ', frame);
 
