@@ -43,9 +43,9 @@ export class CGMain {
     fromEvent<MouseEvent>(document, "mousedown")
       .pipe(
         tap(e => {
-          this.inGesture = this.isGestureButton(e);
+          this.inGesture = false;
         }),
-        filter<MouseEvent>(e => e.button == 2),
+        filter<MouseEvent>(e => this.isGestureButton(e)),
         switchMap(e => move$)
       )
       .subscribe(e => {
