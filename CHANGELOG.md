@@ -1,5 +1,9 @@
 # Change log
 
+# v0.0.5 (2019-02-27)
+
+- fix contextMenu didn't show up
+
 # v0.0.4 (2019-02-27)
 
 - minor bugfix
