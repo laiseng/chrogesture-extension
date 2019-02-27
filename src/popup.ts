@@ -1,4 +1,6 @@
-// import * as moment from 'moment';
+export class Popup {
+  x = 2;
+} // import * as moment from 'moment';
 // import * as $ from 'jquery';
 
 // let count = 0;

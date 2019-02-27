@@ -1,4 +1,4 @@
-// import * as moment from 'moment';
+export class nothing {} // import * as moment from 'moment';
 // import * as $ from 'jquery';
 
 // // Saves options to chrome.storage.sync.
@@ -33,4 +33,3 @@
 
 // $('#save').click(save_options);
 // $(restore_options); // document.addEventListener('DOMContentLoaded', restore_options);
-

@@ -1,28 +1,28 @@
-import { GestureTypes, Gestures } from "./cgesture";
+import { GestureTypes, Gestures } from "./lib/cg-main";
 
-chrome.runtime.onMessage.addListener((message: Gestures, sender, sendResponse: Function) => {
+chrome.runtime.onMessage.addListener(
+  (message: Gestures, sender, sendResponse: Function) => {
+    if (arraysEqual(message.gestures, [GestureTypes.Down])) {
+      chrome.tabs.remove(sender.tab.id);
+    }
 
-  if (arraysEqual(message.gestures, [GestureTypes.Down])) {
-    chrome.tabs.remove(sender.tab.id);
-  }
+    if (arraysEqual(message.gestures, [GestureTypes.Up])) {
+      chrome.tabs.create({ url: "chrome://newtab" });
+    }
 
-  if (arraysEqual(message.gestures, [GestureTypes.Up])) {
-    chrome.tabs.create({ url: 'chrome://newtab' });
-  }
+    if (arraysEqual(message.gestures, [GestureTypes.Left])) {
+      chrome.tabs.executeScript(null, { code: "window.history.back()" });
+    }
 
-  if (arraysEqual(message.gestures, [GestureTypes.Left])) {
-    chrome.tabs.executeScript(null, { "code": "window.history.back()" });
+    if (arraysEqual(message.gestures, [GestureTypes.Right])) {
+      chrome.tabs.executeScript(null, { code: "window.history.forward()" });
+    }
+    if (arraysEqual(message.gestures, [GestureTypes.Up, GestureTypes.Down])) {
+      // chrome.history.
+      chrome.sessions.restore();
+    }
   }
-
-  if (arraysEqual(message.gestures, [GestureTypes.Right])) {
-    chrome.tabs.executeScript(null, { "code": "window.history.forward()" });
-  }
-  if (arraysEqual(message.gestures, [GestureTypes.Up, GestureTypes.Down])) {
-    // chrome.history.
-    chrome.sessions.restore();
-    console.log("updown triggered -undo close tab");
-  }
-})
+);
 
 function arraysEqual(a, b) {
   if (a === b) return true;
