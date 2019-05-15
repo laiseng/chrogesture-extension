@@ -5,9 +5,16 @@ export interface Coordinate {
   x: number;
   y: number;
 }
-export class Gestures {
-  gestures: GestureTypes[];
+export enum MessageTypes {
+  Gesture,
+  Url
 }
+
+export interface SendMessage {
+  type: MessageTypes;
+  value: GestureTypes[] | string;
+}
+
 export enum GestureTypes {
   Up,
   Down,
@@ -20,6 +27,7 @@ export class CGMain {
   inGesture = false;
   gestures: GestureTypes[] = [];
   anchorCoordinate: Coordinate;
+  currentAnchorTarget: HTMLAnchorElement;
   constructor() {
     fromEvent(document, "contextmenu").subscribe(e => {
       if (this.inGesture) {
@@ -33,7 +41,18 @@ export class CGMain {
         fromEvent(document, "mouseup").pipe(
           tap(e => {
             this.anchorCoordinate = null;
-            chrome.runtime.sendMessage({ gestures: this.gestures } as Gestures);
+            if (this.currentAnchorTarget) {
+              console.log("is anchor", this.currentAnchorTarget);
+              chrome.runtime.sendMessage({
+                type: MessageTypes.Url,
+                value: this.currentAnchorTarget.href
+              } as SendMessage);
+            } else {
+              chrome.runtime.sendMessage({
+                type: MessageTypes.Gesture,
+                value: this.gestures
+              } as SendMessage);
+            }
             this.gestures = [];
           })
         )
@@ -46,6 +65,15 @@ export class CGMain {
           this.inGesture = false;
         }),
         filter<MouseEvent>(e => this.isGestureButton(e)),
+        tap<MouseEvent>(e => {
+          console.log("tapping mouse down is anchor");
+          this.currentAnchorTarget = this.lookupParentsForAnchor(e);
+          console.log(
+            "[currentAnchorTarget]",
+            this.currentAnchorTarget,
+            chrome.tabs
+          );
+        }),
         switchMap(e => move$)
       )
       .subscribe(e => {
@@ -77,6 +105,18 @@ export class CGMain {
       });
 
     this.setIFrameMouseEventBorderStyle();
+  }
+
+  lookupParentsForAnchor(e: MouseEvent) {
+    console.log("this.currentAnchorTarget", e.target);
+    let t = e.target as HTMLAnchorElement;
+    while (t.parentElement) {
+      t = t.parentElement as HTMLAnchorElement;
+      if (t.href != null) {
+        return t;
+      }
+    }
+    return null;
   }
 
   getCoordinate(e: MouseEvent): Coordinate {

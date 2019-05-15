@@ -1,28 +1,43 @@
-import { GestureTypes, Gestures } from "./lib/cg-main";
+import { GestureTypes, SendMessage, MessageTypes } from "./lib/cg-main";
 
 chrome.runtime.onMessage.addListener(
-  (message: Gestures, sender, sendResponse: Function) => {
-    if (arraysEqual(message.gestures, [GestureTypes.Down])) {
-      chrome.tabs.remove(sender.tab.id);
-    }
-
-    if (arraysEqual(message.gestures, [GestureTypes.Up])) {
-      chrome.tabs.create({ url: "chrome://newtab" });
-    }
-
-    if (arraysEqual(message.gestures, [GestureTypes.Left])) {
-      chrome.tabs.executeScript(null, { code: "window.history.back()" });
-    }
-
-    if (arraysEqual(message.gestures, [GestureTypes.Right])) {
-      chrome.tabs.executeScript(null, { code: "window.history.forward()" });
-    }
-    if (arraysEqual(message.gestures, [GestureTypes.Up, GestureTypes.Down])) {
-      // chrome.history.
-      chrome.sessions.restore();
+  (message: SendMessage, sender, sendResponse: Function) => {
+    switch (message.type) {
+      case MessageTypes.Gesture:
+        exeGesture(message.value as GestureTypes[], sender, sendResponse);
+        break;
+      case MessageTypes.Url:
+        exeOpenLink(message.value as string, sender, sendResponse);
+        break;
     }
   }
 );
+
+function exeOpenLink(payload: string, sender, sendResponse: Function) {
+  console.log("OpeningLink", payload);
+  chrome.tabs.create({ url: payload });
+}
+function exeGesture(payload: GestureTypes[], sender, sendResponse: Function) {
+  if (arraysEqual(payload, [GestureTypes.Down])) {
+    chrome.tabs.remove(sender.tab.id);
+  }
+
+  if (arraysEqual(payload, [GestureTypes.Up])) {
+    chrome.tabs.create({ url: "chrome://newtab" });
+  }
+
+  if (arraysEqual(payload, [GestureTypes.Left])) {
+    chrome.tabs.executeScript(null, { code: "window.history.back()" });
+  }
+
+  if (arraysEqual(payload, [GestureTypes.Right])) {
+    chrome.tabs.executeScript(null, { code: "window.history.forward()" });
+  }
+  if (arraysEqual(payload, [GestureTypes.Up, GestureTypes.Down])) {
+    // chrome.history.
+    chrome.sessions.restore();
+  }
+}
 
 function arraysEqual(a, b) {
   if (a === b) return true;
