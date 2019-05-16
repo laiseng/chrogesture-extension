@@ -1,26 +1,9 @@
 import { fromEvent, merge, concat } from "rxjs";
 import { switchMap, tap, takeUntil, filter } from "rxjs/operators";
-
-export interface Coordinate {
-  x: number;
-  y: number;
-}
-export enum MessageTypes {
-  Gesture,
-  Url
-}
-
-export interface SendMessage {
-  type: MessageTypes;
-  value: GestureTypes[] | string;
-}
-
-export enum GestureTypes {
-  Up,
-  Down,
-  Left,
-  Right
-}
+import { Coordinate } from "../models/coordinate.interface";
+import { MessageTypes } from "../models/message-types.enum";
+import { BackgroundMessagePayload } from "../models/background-message-payload.interface";
+import { GestureTypes } from "../models/gesture-types.enum";
 
 const MIN_LENGTH = 10;
 export class CGMain {
@@ -45,13 +28,15 @@ export class CGMain {
               console.log("is anchor", this.currentAnchorTarget);
               chrome.runtime.sendMessage({
                 type: MessageTypes.Url,
-                value: this.currentAnchorTarget.href
-              } as SendMessage);
+                gestures: this.gestures,
+                url: this.currentAnchorTarget.href
+              } as BackgroundMessagePayload);
             } else {
               chrome.runtime.sendMessage({
                 type: MessageTypes.Gesture,
-                value: this.gestures
-              } as SendMessage);
+                gestures: this.gestures,
+                url: null
+              } as BackgroundMessagePayload);
             }
             this.gestures = [];
           })
@@ -109,11 +94,16 @@ export class CGMain {
 
   lookupParentsForAnchor(e: MouseEvent) {
     console.log("this.currentAnchorTarget", e.target);
-    let t = e.target as HTMLAnchorElement;
-    while (t.parentElement) {
-      t = t.parentElement as HTMLAnchorElement;
-      if (t.href != null) {
-        return t;
+    let target = e.target as HTMLAnchorElement;
+
+    if (target.href != null) {
+      return target;
+    }
+
+    while (target.parentElement) {
+      target = target.parentElement as HTMLAnchorElement;
+      if (target.href != null) {
+        return target;
       }
     }
     return null;
