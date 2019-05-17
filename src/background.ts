@@ -2,9 +2,32 @@ import { GestureTypes } from "./models/gesture-types.enum";
 import { BackgroundMessagePayload } from "./models/background-message-payload.interface";
 import { MessageTypes } from "./models/message-types.enum";
 import { GestureCommandTypes } from "./models/gesture-command-types.model";
+import { OptionStorageModel } from "./models/options-storage.model";
 
 export class CgBackground {
-  constructor() {}
+  enableUpOpenLink = false;
+  constructor() {
+    chrome.storage.sync.get(o => {
+      console.log("[From Background]", o);
+      this.enableUpOpenLink = (o as OptionStorageModel).UpOpenLink;
+    });
+
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      for (var key in changes) {
+        var storageChange = changes[key];
+        console.log(
+          'Storage key "%s" in namespace "%s" changed. ' +
+            'Old value was "%s", new value is "%s".',
+          key,
+          namespace,
+          storageChange.oldValue,
+          storageChange.newValue
+        );
+        console.log("[From Background OnChange]", changes["UpOpenLink"]);
+        this.enableUpOpenLink = changes["UpOpenLink"].newValue;
+      }
+    });
+  }
 
   run() {
     chrome.runtime.onMessage.addListener(
@@ -57,7 +80,8 @@ export class CgBackground {
 
     if (
       this.arraysEqual(payload.gestures, [GestureTypes.Up]) &&
-      payload.type == MessageTypes.Url
+      payload.type == MessageTypes.Url &&
+      this.enableUpOpenLink
     ) {
       return GestureCommandTypes.OpenLinkInBackground;
     }

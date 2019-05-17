@@ -3,7 +3,7 @@
 
   "name": "Chrogesture Extension",
   "description": "Chrome mouse gesture extension, use gesture up, down, left, right to execute command in chrome",
-  "version": "0.0.6",
+  "version": "0.0.7",
 
   "options_ui": {
     "page": "ui/options.html",
