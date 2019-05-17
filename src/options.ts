@@ -8,6 +8,13 @@ export class CgOption {
         UpOpenLink: (e.target as HTMLInputElement).checked
       } as OptionStorageModel);
     });
+
+    chrome.storage.sync.get(o => {
+      console.log("[From Background]", o);
+      (document.querySelector(
+        "#upopenlink"
+      ) as HTMLInputElement).checked = (o as OptionStorageModel).UpOpenLink;
+    });
   }
 }
 

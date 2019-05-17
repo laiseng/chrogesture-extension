@@ -80,10 +80,11 @@ export class CgBackground {
 
     if (
       this.arraysEqual(payload.gestures, [GestureTypes.Up]) &&
-      payload.type == MessageTypes.Url &&
-      this.enableUpOpenLink
+      payload.type == MessageTypes.Url
     ) {
-      return GestureCommandTypes.OpenLinkInBackground;
+      return this.enableUpOpenLink
+        ? GestureCommandTypes.OpenLinkInBackground
+        : GestureCommandTypes.NewEmptyTab;
     }
 
     if (this.arraysEqual(payload.gestures, [GestureTypes.Left])) {
