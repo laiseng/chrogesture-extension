@@ -1,3 +1,26 @@
+import { OptionStorageModel } from "./models/options-storage.model";
+
+export class CgOption {
+  run() {
+    console.log(document.querySelector("#upopenlink"));
+    document.querySelector("#upopenlink").addEventListener("click", e => {
+      chrome.storage.sync.set({
+        UpOpenLink: (e.target as HTMLInputElement).checked
+      } as OptionStorageModel);
+    });
+
+    chrome.storage.sync.get(o => {
+      console.log("[From Background]", o);
+      (document.querySelector(
+        "#upopenlink"
+      ) as HTMLInputElement).checked = (o as OptionStorageModel).UpOpenLink;
+    });
+  }
+}
+
+let options = new CgOption();
+options.run();
+
 // import * as moment from 'moment';
 // import * as $ from 'jquery';
 
@@ -33,4 +56,3 @@
 
 // $('#save').click(save_options);
 // $(restore_options); // document.addEventListener('DOMContentLoaded', restore_options);
-
