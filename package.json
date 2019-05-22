@@ -14,6 +14,8 @@
     "url": "https://github.com/chibat/chrome-extension-typescript-starter.git"
   },
   "dependencies": {
+    "@types/webpack": "^4.4.32",
+    "material-components-web": "^2.2.0",
     "rxjs": "^6.5.2",
     "uglifyjs-webpack-plugin": "^2.1.3"
   },

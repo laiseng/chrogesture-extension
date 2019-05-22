@@ -1,34 +1,22 @@
-export class Popup {
-  x = 2;
-} // import * as moment from 'moment';
-// import * as $ from 'jquery';
+import { OptionStorageModel } from "./models/options-storage.model";
 
-// let count = 0;
+export class CgPopup {
+  run() {
+    console.log(document.querySelector("#upopenlink"));
+    document.querySelector("#upopenlink").addEventListener("click", e => {
+      chrome.storage.sync.set({
+        UpOpenLink: (e.target as HTMLInputElement).checked
+      } as OptionStorageModel);
+    });
 
-// $(function() {
-//   const queryInfo = {
-//     active: true,
-//     currentWindow: true
-//   };
+    chrome.storage.sync.get(o => {
+      console.log("[From Background]", o);
+      (document.querySelector(
+        "#upopenlink"
+      ) as HTMLInputElement).checked = (o as OptionStorageModel).UpOpenLink;
+    });
+  }
+}
 
-//   chrome.tabs.query(queryInfo, function(tabs) {
-//     $('#url').text(tabs[0].url);
-//     $('#time').text(moment().format('YYYY-MM-DD HH:mm:ss'));
-//   });
-
-//   chrome.browserAction.setBadgeText({text: count.toString()});
-//   $('#countUp').click(()=>{
-//     chrome.browserAction.setBadgeText({text: (++count).toString()});
-//   });
-
-//   $('#changeBackground').click(()=>{
-//     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-//       chrome.tabs.sendMessage(tabs[0].id, {
-//         color: '#555555'
-//       },
-//       function(msg) {
-//         console.log("result message:", msg);
-//       });
-//     });
-//   });
-// });
+let options = new CgPopup();
+options.run();
