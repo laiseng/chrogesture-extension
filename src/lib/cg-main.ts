@@ -1,25 +1,16 @@
 import { fromEvent, merge, concat } from "rxjs";
 import { switchMap, tap, takeUntil, filter } from "rxjs/operators";
-
-export interface Coordinate {
-  x: number;
-  y: number;
-}
-export class Gestures {
-  gestures: GestureTypes[];
-}
-export enum GestureTypes {
-  Up,
-  Down,
-  Left,
-  Right
-}
+import { Coordinate } from "../models/coordinate.interface";
+import { MessageTypes } from "../models/message-types.enum";
+import { BackgroundMessagePayload } from "../models/background-message-payload.interface";
+import { GestureTypes } from "../models/gesture-types.enum";
 
 const MIN_LENGTH = 10;
 export class CGMain {
   inGesture = false;
   gestures: GestureTypes[] = [];
   anchorCoordinate: Coordinate;
+  currentAnchorTarget: HTMLAnchorElement;
   constructor() {
     fromEvent(document, "contextmenu").subscribe(e => {
       if (this.inGesture) {
@@ -33,7 +24,20 @@ export class CGMain {
         fromEvent(document, "mouseup").pipe(
           tap(e => {
             this.anchorCoordinate = null;
-            chrome.runtime.sendMessage({ gestures: this.gestures } as Gestures);
+            if (this.currentAnchorTarget) {
+              console.log("is anchor", this.currentAnchorTarget);
+              chrome.runtime.sendMessage({
+                type: MessageTypes.Url,
+                gestures: this.gestures,
+                url: this.currentAnchorTarget.href
+              } as BackgroundMessagePayload);
+            } else {
+              chrome.runtime.sendMessage({
+                type: MessageTypes.Gesture,
+                gestures: this.gestures,
+                url: null
+              } as BackgroundMessagePayload);
+            }
             this.gestures = [];
           })
         )
@@ -46,6 +50,15 @@ export class CGMain {
           this.inGesture = false;
         }),
         filter<MouseEvent>(e => this.isGestureButton(e)),
+        tap<MouseEvent>(e => {
+          console.log("tapping mouse down is anchor");
+          this.currentAnchorTarget = this.lookupParentsForAnchor(e);
+          console.log(
+            "[currentAnchorTarget]",
+            this.currentAnchorTarget,
+            chrome.tabs
+          );
+        }),
         switchMap(e => move$)
       )
       .subscribe(e => {
@@ -77,6 +90,23 @@ export class CGMain {
       });
 
     this.setIFrameMouseEventBorderStyle();
+  }
+
+  lookupParentsForAnchor(e: MouseEvent) {
+    console.log("this.currentAnchorTarget", e.target);
+    let target = e.target as HTMLAnchorElement;
+
+    if (target.href != null) {
+      return target;
+    }
+
+    while (target.parentElement) {
+      target = target.parentElement as HTMLAnchorElement;
+      if (target.href != null) {
+        return target;
+      }
+    }
+    return null;
   }
 
   getCoordinate(e: MouseEvent): Coordinate {

@@ -3,30 +3,88 @@
   <head>
     <meta charset="UTF-8" />
     <title>Getting Started Extension's Popup</title>
-    <style>
-      body {
-        font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
-        font-size: 100%;
-      }
-    </style>
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <link href="styles.css" rel="stylesheet" />
     <script src="../js/vendor.js"></script>
   </head>
 
   <body>
-    <h1 style="background-color:red">Instructions</h1>
-    <p>
+    <div class="cg_head">
+      <img src="icon.png" />
+      <h1>Instructions</h1>
+    </div>
+    <!-- <a class="gtx-a" id="options-link" target="_blank" href="options.html"
+      >Extension Options</a
+    > -->
+    <h6 class="mdc-typography--subtitle2">
       Hold down right mouse button and drag the followin gesture and release
-    </p>
-    <ul>
-      <li><b>Up</b> - New tab</li>
-      <li><b>Down</b> - Close current tab</li>
-      <li><b>Left</b> - page back</li>
-      <li><b>Right</b> - page forward</li>
-      <li><b>Up, Down</b> - Restore last closed tab session</li>
+    </h6>
+
+    <ul class="mdc-list">
+      <li class="mdc-list-item" tabindex="0">
+        <span class="mdc-list-item__text"> <b>Up</b> - New tab </span>
+      </li>
+      <li class="mdc-list-item">
+        <span class="mdc-list-item__text">
+          <b>Down</b> - Close current tab
+        </span>
+      </li>
+      <li class="mdc-list-item">
+        <span class="mdc-list-item__text"> <b>Left</b> - page back </span>
+      </li>
+      <li class="mdc-list-item">
+        <span class="mdc-list-item__text"> <b>Right</b> - page forward </span>
+      </li>
+      <li class="mdc-list-item">
+        <span class="mdc-list-item__text">
+          <b>Up, Down</b> - Restore last closed tab session
+        </span>
+      </li>
+      <li class="mdc-list-item">
+        <span class="mdc-list-item__text">
+          <div class="mdc-form-field">
+            <div class="mdc-checkbox">
+              <input
+                id="upopenlink"
+                type="checkbox"
+                class="mdc-checkbox__native-control"
+                id="checkbox-1"
+              />
+              <div class="mdc-checkbox__background">
+                <svg class="mdc-checkbox__checkmark" viewBox="0 0 24 24">
+                  <path
+                    class="mdc-checkbox__checkmark-path"
+                    fill="none"
+                    d="M1.73,12.91 8.1,19.28 22.79,4.59"
+                  />
+                </svg>
+                <div class="mdc-checkbox__mixedmark"></div>
+              </div>
+            </div>
+            <label for="checkbox-1"
+              >drag a link upward and release to open link in new tab</label
+            >
+          </div>
+        </span>
+      </li>
     </ul>
-    <p>
-      fork me at
+    <h6 class="mdc-typography--subtitle2">
+      Fork me at
       <a href="https://github.com/laiseng/chrogesture-extension">GitHub</a>
-    </p>
+    </h6>
+    <script src="../js/popup.js"></script>
   </body>
 </html>
