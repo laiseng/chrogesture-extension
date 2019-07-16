@@ -8,7 +8,7 @@
       rel="stylesheet"
     />
     <link
-      href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+      href="material-components-web/material-components-web.min.css"
       rel="stylesheet"
     />
     <link
@@ -16,7 +16,7 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
     />
 
-    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script src="material-components-web/material-components-web.min.js"></script>
     <link href="styles.css" rel="stylesheet" />
     <script src="../js/vendor.js"></script>
   </head>
@@ -35,22 +35,42 @@
 
     <ul class="mdc-list">
       <li class="mdc-list-item" tabindex="0">
-        <span class="mdc-list-item__text"> <b>Up</b> - New tab </span>
-      </li>
-      <li class="mdc-list-item">
         <span class="mdc-list-item__text">
-          <b>Down</b> - Close current tab
+          <i class="material-icons">
+            arrow_upward
+          </i>
+          - New tab
         </span>
       </li>
       <li class="mdc-list-item">
-        <span class="mdc-list-item__text"> <b>Left</b> - page back </span>
-      </li>
-      <li class="mdc-list-item">
-        <span class="mdc-list-item__text"> <b>Right</b> - page forward </span>
+        <span class="mdc-list-item__text">
+          <i class="material-icons">
+            arrow_downward
+          </i>
+          - Close current tab
+        </span>
       </li>
       <li class="mdc-list-item">
         <span class="mdc-list-item__text">
-          <b>Up, Down</b> - Restore last closed tab session
+          <i class="material-icons">
+            arrow_back
+          </i>
+          - page back
+        </span>
+      </li>
+      <li class="mdc-list-item">
+        <span class="mdc-list-item__text"
+          ><i class="material-icons">
+            arrow_forward
+          </i>
+          - page forward
+        </span>
+      </li>
+      <li class="mdc-list-item">
+        <span class="mdc-list-item__text">
+          <i class="material-icons"> arrow_upward </i>
+          <i class="material-icons"> arrow_downward </i>- Restore last closed
+          tab session
         </span>
       </li>
       <li class="mdc-list-item">

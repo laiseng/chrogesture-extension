@@ -6,12 +6,16 @@ import { OptionStorageModel } from "./models/options-storage.model";
 
 export class CgBackground {
   enableUpOpenLink = false;
+  openLinkCount = 0;
   constructor() {
     chrome.storage.sync.get(o => {
       console.log("[From Background]", o);
       this.enableUpOpenLink = (o as OptionStorageModel).UpOpenLink;
     });
 
+    chrome.tabs.onActivated.addListener(x => {
+      this.openLinkCount = 0;
+    });
     chrome.storage.onChanged.addListener((changes, namespace) => {
       for (var key in changes) {
         var storageChange = changes[key];
@@ -58,7 +62,13 @@ export class CgBackground {
         chrome.tabs.create({ url: "chrome://newtab" });
         break;
       case GestureCommandTypes.OpenLinkInBackground:
-        chrome.tabs.create({ url: message.url, active: false });
+        chrome.tabs.query({ active: true }, tabs => {
+          chrome.tabs.create({
+            url: message.url,
+            active: false,
+            index: tabs[0].index + this.openLinkCount++ + 1
+          });
+        });
         break;
       case GestureCommandTypes.UndoCloseTab:
         chrome.sessions.restore();
