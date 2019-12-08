@@ -2,6 +2,11 @@ import { OptionStorageModel } from "./models/options-storage.model";
 
 export class CgOption {
   run() {
+    chrome.storage.sync.set({
+      UpOpenLink: true
+    } as OptionStorageModel);
+
+
     console.log(document.querySelector("#upopenlink"));
     document.querySelector("#upopenlink").addEventListener("click", e => {
       chrome.storage.sync.set({

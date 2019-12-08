@@ -5,7 +5,7 @@ import { GestureCommandTypes } from "./models/gesture-command-types.model";
 import { OptionStorageModel } from "./models/options-storage.model";
 
 export class CgBackground {
-  enableUpOpenLink = false;
+  enableUpOpenLink = true;
   openLinkCount = 0;
   constructor() {
     chrome.storage.sync.get(o => {
