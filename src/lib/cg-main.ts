@@ -2,7 +2,7 @@ import { fromEvent, merge, concat } from "rxjs";
 import { switchMap, tap, takeUntil, filter } from "rxjs/operators";
 import { Coordinate } from "../models/coordinate.interface";
 import { MessageTypes } from "../models/message-types.enum";
-import { BackgroundMessagePayload } from "../models/background-message-payload.interface";
+import { IBackgroundMessagePayload } from "../models/i-background-message-payload";
 import { GestureTypes } from "../models/gesture-types.enum";
 
 const MIN_LENGTH = 10;
@@ -11,8 +11,11 @@ export class CGMain {
   gestures: GestureTypes[] = [];
   anchorCoordinate: Coordinate;
   currentAnchorTarget: HTMLAnchorElement;
+  indicatorElement: HTMLDivElement;
+
   constructor() {
-    fromEvent(document, "contextmenu").subscribe(e => {
+    this.initIndicatorElement();
+    fromEvent(document, "contextmenu").subscribe((e) => {
       if (this.inGesture) {
         e.preventDefault();
       }
@@ -20,23 +23,28 @@ export class CGMain {
     });
 
     let move$ = fromEvent<MouseEvent>(document, "mousemove").pipe(
+      tap((x) => {
+        this.showIndicator(true);
+      }),
       takeUntil(
         fromEvent(document, "mouseup").pipe(
-          tap(e => {
+          tap((e) => {
+            this.showIndicator(false);
+
             this.anchorCoordinate = null;
             if (this.currentAnchorTarget) {
               console.log("is anchor", this.currentAnchorTarget);
               chrome.runtime.sendMessage({
                 type: MessageTypes.Url,
                 gestures: this.gestures,
-                url: this.currentAnchorTarget.href
-              } as BackgroundMessagePayload);
+                url: this.currentAnchorTarget.href,
+              } as IBackgroundMessagePayload);
             } else {
               chrome.runtime.sendMessage({
                 type: MessageTypes.Gesture,
                 gestures: this.gestures,
-                url: null
-              } as BackgroundMessagePayload);
+                url: null,
+              } as IBackgroundMessagePayload);
             }
             this.gestures = [];
           })
@@ -46,11 +54,11 @@ export class CGMain {
 
     fromEvent<MouseEvent>(document, "mousedown")
       .pipe(
-        tap(e => {
+        tap((e) => {
           this.inGesture = false;
         }),
-        filter<MouseEvent>(e => this.isGestureButton(e)),
-        tap<MouseEvent>(e => {
+        filter<MouseEvent>((e) => this.isGestureButton(e)),
+        tap<MouseEvent>((e) => {
           console.log("tapping mouse down is anchor");
           this.currentAnchorTarget = this.lookupParentsForAnchor(e);
           console.log(
@@ -59,9 +67,9 @@ export class CGMain {
             chrome.tabs
           );
         }),
-        switchMap(e => move$)
+        switchMap((e) => move$)
       )
-      .subscribe(e => {
+      .subscribe((e) => {
         // this.addDot(e);
         let currentCoordinate = this.getCoordinate(e);
         if (!this.anchorCoordinate) {
@@ -84,6 +92,8 @@ export class CGMain {
             ) {
               this.gestures.push(vector);
             }
+
+            this.printGestures();
             this.anchorCoordinate = currentCoordinate;
           }
         }
@@ -145,11 +155,13 @@ export class CGMain {
   isGestureButton(e: MouseEvent) {
     return e.button == 2;
   }
+
   getVectorText() {
-    return this.gestures.map(x => {
+    return this.gestures.map((x) => {
       return GestureTypes[x];
     });
   }
+
   addDot(e: MouseEvent) {
     let div = document.createElement("div");
     div.style.position = "absolute";
@@ -161,6 +173,54 @@ export class CGMain {
     document.body.appendChild(div);
   }
 
+  initIndicatorElement() {
+    this.indicatorElement = document.createElement("div");
+    this.indicatorElement.id = "chrogestureid";
+    this.indicatorElement.style.position = "fixed";
+    this.indicatorElement.style.width = "10em";
+    // this.indicatorElement.style.height = "10em";
+    this.indicatorElement.style.backgroundColor = "black";
+    this.indicatorElement.style.top = "2rem";
+    this.indicatorElement.style.zIndex = "9999";
+    this.indicatorElement.style.borderRadius = "2em";
+    this.indicatorElement.style.border = "solid white";
+    this.indicatorElement.style.opacity = "0.8";
+    this.indicatorElement.style.fontSize = "5rem";
+    this.indicatorElement.style.color = "white";
+    this.indicatorElement.style.padding = "0.5rem 3rem 0.5rem 3rem";
+    this.indicatorElement.style.textAlign = "center";
+    this.indicatorElement.style.overflow = "hidden";
+    this.indicatorElement.style.textOverflow = "ellipsis";
+    this.indicatorElement.style.whiteSpace = "nowrap";
+
+    this.indicatorElement.style.left = "calc(50vw - 5em)";
+    this.showIndicator(false);
+
+    document.body.appendChild(this.indicatorElement);
+  }
+
+  showIndicator(show: boolean) {
+    show
+      ? (this.indicatorElement.style.visibility = "initial")
+      : (this.indicatorElement.style.visibility = "hidden");
+  }
+
+  printGestures() {
+    this.indicatorElement.innerText = this.gestures
+      .map((x) => {
+        switch (x) {
+          case GestureTypes.Up:
+            return "⬆";
+          case GestureTypes.Down:
+            return "⬇";
+          case GestureTypes.Left:
+            return "⬅";
+          case GestureTypes.Right:
+            return "➡";
+        }
+      })
+      .join(" ");
+  }
   setIFrameMouseEventBorderStyle() {
     // document.querySelectorAll('iframe').forEach((frame: HTMLIFrameElement) => {
     //   console.log('add iframe style to ', frame);
