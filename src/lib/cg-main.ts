@@ -100,6 +100,7 @@ export class CGMain {
       });
 
     this.setIFrameMouseEventBorderStyle();
+    this.initReadyIndicatorElement();
   }
 
   lookupParentsForAnchor(e: MouseEvent) {
@@ -175,28 +176,23 @@ export class CGMain {
 
   initIndicatorElement() {
     this.indicatorElement = document.createElement("div");
-    this.indicatorElement.id = "chrogestureid";
-    this.indicatorElement.style.position = "fixed";
-    this.indicatorElement.style.width = "10em";
-    // this.indicatorElement.style.height = "10em";
-    this.indicatorElement.style.backgroundColor = "black";
-    this.indicatorElement.style.top = "2rem";
-    this.indicatorElement.style.zIndex = "9999";
-    this.indicatorElement.style.borderRadius = "2em";
-    this.indicatorElement.style.border = "solid white";
-    this.indicatorElement.style.opacity = "0.8";
-    this.indicatorElement.style.fontSize = "5rem";
-    this.indicatorElement.style.color = "white";
-    this.indicatorElement.style.padding = "0.5rem 3rem 0.5rem 3rem";
-    this.indicatorElement.style.textAlign = "center";
-    this.indicatorElement.style.overflow = "hidden";
-    this.indicatorElement.style.textOverflow = "ellipsis";
-    this.indicatorElement.style.whiteSpace = "nowrap";
 
-    this.indicatorElement.style.left = "calc(50vw - 5em)";
+    this.indicatorElement.id = "chrogestureid";
+    this.indicatorElement.classList.add("chgs-indicator");
+
     this.showIndicator(false);
 
     document.body.appendChild(this.indicatorElement);
+  }
+
+  initReadyIndicatorElement() {
+    let el = document.createElement("div");
+
+    el.id = "chrogestureready";
+    el.classList.add("ready-indicator");
+    el.innerText = "Ready for gesture";
+    el.style.visibility = "hidden";
+    document.body.appendChild(el);
   }
 
   showIndicator(show: boolean) {
