@@ -1,5 +1,5 @@
 import { GestureTypes } from "./models/gesture-types.enum";
-import { BackgroundMessagePayload } from "./models/background-message-payload.interface";
+import { IBackgroundMessagePayload } from "./models/i-background-message-payload";
 import { MessageTypes } from "./models/message-types.enum";
 import { GestureCommandTypes } from "./models/gesture-command-types.model";
 import { OptionStorageModel } from "./models/options-storage.model";
@@ -8,12 +8,12 @@ export class CgBackground {
   enableUpOpenLink = true;
   openLinkCount = 0;
   constructor() {
-    chrome.storage.sync.get(o => {
+    chrome.storage.sync.get((o) => {
       console.log("[From Background]", o);
       this.enableUpOpenLink = (o as OptionStorageModel).UpOpenLink;
     });
 
-    chrome.tabs.onActivated.addListener(x => {
+    chrome.tabs.onActivated.addListener((x) => {
       this.openLinkCount = 0;
     });
     chrome.storage.onChanged.addListener((changes, namespace) => {
@@ -35,7 +35,7 @@ export class CgBackground {
 
   run() {
     chrome.runtime.onMessage.addListener(
-      (message: BackgroundMessagePayload, sender, sendResponse: Function) => {
+      (message: IBackgroundMessagePayload, sender, sendResponse: Function) => {
         let detectedCommand = this.detectGestureCommand(message);
         this.exeGesture(detectedCommand, message, sender, sendResponse);
       }
@@ -44,7 +44,7 @@ export class CgBackground {
 
   exeGesture(
     command: GestureCommandTypes,
-    message: BackgroundMessagePayload,
+    message: IBackgroundMessagePayload,
     sender,
     sendResponse: Function
   ) {
@@ -62,11 +62,11 @@ export class CgBackground {
         chrome.tabs.create({ url: "chrome://newtab" });
         break;
       case GestureCommandTypes.OpenLinkInBackground:
-        chrome.tabs.query({ active: true }, tabs => {
+        chrome.tabs.query({ active: true }, (tabs) => {
           chrome.tabs.create({
             url: message.url,
             active: false,
-            index: tabs[0].index + this.openLinkCount++ + 1
+            index: tabs[0].index + this.openLinkCount++ + 1,
           });
         });
         break;
@@ -76,7 +76,9 @@ export class CgBackground {
     }
   }
 
-  detectGestureCommand(payload: BackgroundMessagePayload): GestureCommandTypes {
+  detectGestureCommand(
+    payload: IBackgroundMessagePayload
+  ): GestureCommandTypes {
     if (this.arraysEqual(payload.gestures, [GestureTypes.Down])) {
       return GestureCommandTypes.CloseTab;
     }
