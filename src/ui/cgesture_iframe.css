@@ -5,10 +5,11 @@ iframe:hover > .chgs-indicator {
 }
 
 .chgs-indicator {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji";
   position: fixed;
   width: 30%;
   line-height: 38px;
-  background-color: black;
+  background-color: rgba(0, 0, 0, 0.85);
   top: 48px;
   z-index: 9999;
   border-radius: 16px;
@@ -27,21 +28,21 @@ iframe:hover > .chgs-indicator {
 
 .ready-indicator {
   position: fixed;
-  width: 50%;
-  line-height: 38px;
-  background-color: black;
-  bottom: 48px;
+  width: 230px;
+  line-height: 20px;
+  background-color: rgba(0, 0, 0, 0.85);
+  bottom: 32px;
   z-index: 9999;
   border-radius: 16px;
   opacity: 0.85;
-  font-size: 38px;
+  font-size: 20px;
   color: white;
   padding: 16px 48px;
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  left: calc(50vw - 25%);
+  left: calc(50vw - 115px);
   box-shadow: 0 5px 5px -3px rgb(0 0 0 / 20%), 0 8px 10px 1px rgb(0 0 0 / 14%),
     0 3px 14px 2px rgb(0 0 0 / 12%);
   animation: readyOut 3s ease-out 1;

@@ -190,7 +190,7 @@ export class CGMain {
 
     el.id = "chrogestureready";
     el.classList.add("ready-indicator");
-    el.innerText = "Ready for gesture";
+    el.innerText = "Gesture ready";
     el.style.visibility = "hidden";
     document.body.appendChild(el);
   }
@@ -206,13 +206,13 @@ export class CGMain {
       .map((x) => {
         switch (x) {
           case GestureTypes.Up:
-            return "⬆";
+            return "🔼";
           case GestureTypes.Down:
-            return "⬇";
+            return "🔽";
           case GestureTypes.Left:
-            return "⬅";
+            return "◀";
           case GestureTypes.Right:
-            return "➡";
+            return "▶";
         }
       })
       .join(" ");

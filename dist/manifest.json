@@ -3,7 +3,7 @@
 
   "name": "Chrogesture Extension",
   "description": "User mouse gesture to trigger browser command.",
-  "version": "0.1.3",
+  "version": "0.1.5",
 
   "options_ui": {
     "page": "ui/options.html",
