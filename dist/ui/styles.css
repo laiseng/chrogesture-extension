@@ -1,6 +1,6 @@
 body {
   margin: 1rem;
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Open Sans', sans-serif;
   width: 500px;
   height: 500px;
 }
@@ -20,6 +20,12 @@ ul {
 }
 
 .flex-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mdc-list-item__text {
   display: flex;
   justify-content: center;
   align-items: center;

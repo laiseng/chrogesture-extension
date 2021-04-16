@@ -1,9 +1,9 @@
-import { fromEvent, merge, concat } from "rxjs";
-import { switchMap, tap, takeUntil, filter } from "rxjs/operators";
-import { Coordinate } from "../models/coordinate.interface";
-import { MessageTypes } from "../models/message-types.enum";
-import { IBackgroundMessagePayload } from "../models/i-background-message-payload";
-import { GestureTypes } from "../models/gesture-types.enum";
+import { fromEvent, merge, concat } from 'rxjs';
+import { switchMap, tap, takeUntil, filter } from 'rxjs/operators';
+import { Coordinate } from '../models/coordinate.interface';
+import { MessageTypes } from '../models/message-types.enum';
+import { IBackgroundMessagePayload } from '../models/i-background-message-payload';
+import { GestureTypes } from '../models/gesture-types.enum';
 
 const MIN_LENGTH = 10;
 export class CGMain {
@@ -13,27 +13,29 @@ export class CGMain {
   currentAnchorTarget: HTMLAnchorElement;
   indicatorElement: HTMLDivElement;
 
+  forceOverIFrameState = false;
+
   constructor() {
     this.initIndicatorElement();
-    fromEvent(document, "contextmenu").subscribe((e) => {
+    fromEvent(document, 'contextmenu').subscribe((e) => {
       if (this.inGesture) {
         e.preventDefault();
       }
       this.inGesture = false;
     });
 
-    let move$ = fromEvent<MouseEvent>(document, "mousemove").pipe(
+    let move$ = fromEvent<MouseEvent>(document, 'mousemove').pipe(
       tap((x) => {
         this.showIndicator(true);
       }),
       takeUntil(
-        fromEvent(document, "mouseup").pipe(
+        fromEvent(document, 'mouseup').pipe(
           tap((e) => {
             this.showIndicator(false);
 
             this.anchorCoordinate = null;
             if (this.currentAnchorTarget) {
-              console.log("is anchor", this.currentAnchorTarget);
+              console.log('is anchor', this.currentAnchorTarget);
               chrome.runtime.sendMessage({
                 type: MessageTypes.Url,
                 gestures: this.gestures,
@@ -52,20 +54,16 @@ export class CGMain {
       )
     );
 
-    fromEvent<MouseEvent>(document, "mousedown")
+    fromEvent<MouseEvent>(document, 'mousedown')
       .pipe(
         tap((e) => {
           this.inGesture = false;
         }),
         filter<MouseEvent>((e) => this.isGestureButton(e)),
         tap<MouseEvent>((e) => {
-          console.log("tapping mouse down is anchor");
+          console.log('tapping mouse down is anchor');
           this.currentAnchorTarget = this.lookupParentsForAnchor(e);
-          console.log(
-            "[currentAnchorTarget]",
-            this.currentAnchorTarget,
-            chrome.tabs
-          );
+          console.log('[currentAnchorTarget]', this.currentAnchorTarget, chrome.tabs);
         }),
         switchMap((e) => move$)
       )
@@ -76,20 +74,11 @@ export class CGMain {
           this.anchorCoordinate = currentCoordinate;
         }
 
-        if (
-          this.getDistance(this.anchorCoordinate, currentCoordinate) >
-          MIN_LENGTH
-        ) {
+        if (this.getDistance(this.anchorCoordinate, currentCoordinate) > MIN_LENGTH) {
           this.inGesture = true;
-          let vector = this.getVector(
-            this.getDegrees(this.anchorCoordinate, currentCoordinate)
-          );
+          let vector = this.getVector(this.getDegrees(this.anchorCoordinate, currentCoordinate));
           if (vector != null) {
-            if (
-              (this.gestures.length > 0 &&
-                this.gestures[this.gestures.length - 1] != vector) ||
-              this.gestures.length == 0
-            ) {
+            if ((this.gestures.length > 0 && this.gestures[this.gestures.length - 1] != vector) || this.gestures.length == 0) {
               this.gestures.push(vector);
             }
 
@@ -101,10 +90,74 @@ export class CGMain {
 
     this.setIFrameMouseEventBorderStyle();
     this.initReadyIndicatorElement();
+
+    // load from storage setting
+    chrome.storage.sync.get('ForceOverIFrame', (x) => {
+      console.log('this is what i get ForceOverIFrame', x.ForceOverIFrame);
+      this.forceOverIFrameState = x.ForceOverIFrame as boolean;
+    });
+
+    // on popup setting change set iframe accordingly
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      console.log(changes);
+      this.togglePointerEventNoneToIFrame(changes?.ForceOverIFrame?.newValue);
+    });
+
+    this.listenToMutationObserver();
+  }
+
+  togglePointerEventNoneToIFrame(toogleAdd: boolean) {
+    toogleAdd
+      ? document.querySelectorAll('iframe').forEach((iframe) => {
+          iframe.classList.add('pointer-event-none');
+        })
+      : document.querySelectorAll('iframe').forEach((iframe) => {
+          iframe.classList.remove('pointer-event-none');
+        });
+  }
+
+  listenToMutationObserver() {
+    // Select the node that will be observed for mutations
+    const targetNode = document;
+
+    // Options for the observer (which mutations to observe)
+    const config: MutationObserverInit = { childList: true, subtree: true };
+
+    // Callback function to execute when mutations are observed
+    const callback = (mutationsList: MutationRecord[], observer: MutationObserver) => {
+      // Use traditional 'for loops' for IE 11
+      for (const mutation of mutationsList) {
+        // console.log('Mutation Item', mutation);
+        if (mutation.type === 'childList') {
+          // console.log('A child node has been added or removed.');
+          mutation.addedNodes?.forEach((node) => {
+            if (node.nodeName == 'IFRAME') {
+              console.log('iframe found added', node);
+              this.togglePointerEventNoneToIFrame(this.forceOverIFrameState);
+            }
+          });
+        }
+        // else if (mutation.type === 'attributes') {
+        //   console.log('The ' + mutation.attributeName + ' attribute was modified.');
+        //   if (mutation.target.nodeName == 'IFRAME') {
+        //     // this.togglePointerEventNoneToIFrame(this.forceOverIFrameState);
+        //   }
+        // }
+      }
+    };
+
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver(callback);
+
+    // Start observing the target node for configured mutations
+    observer.observe(targetNode, config);
+
+    // Later, you can stop observing
+    // observer.disconnect();
   }
 
   lookupParentsForAnchor(e: MouseEvent) {
-    console.log("this.currentAnchorTarget", e.target);
+    console.log('this.currentAnchorTarget', e.target);
     let target = e.target as HTMLAnchorElement;
 
     if (target.href != null) {
@@ -125,9 +178,7 @@ export class CGMain {
   }
 
   getDistance(start: Coordinate, end: Coordinate) {
-    return Math.sqrt(
-      Math.pow(start.x - end.x, 2) + Math.pow(start.y - end.y, 2)
-    );
+    return Math.sqrt(Math.pow(start.x - end.x, 2) + Math.pow(start.y - end.y, 2));
   }
 
   getDegrees(start: Coordinate, end: Coordinate) {
@@ -136,21 +187,21 @@ export class CGMain {
 
   getVector(deg: number) {
     if (deg > -30 && deg < 30) {
-      console.log("gesture", "left");
+      console.log('gesture', 'left');
       // window.history.back();
       return GestureTypes.Left;
     } else if (deg > 60 && deg < 120) {
-      console.log("gesture", "up");
+      console.log('gesture', 'up');
       return GestureTypes.Up;
     } else if (deg > -120 && deg < -60) {
-      console.log("gesture", "down");
+      console.log('gesture', 'down');
       return GestureTypes.Down;
     } else if (deg > 150 || deg < -150) {
-      console.log("gesture", "right");
+      console.log('gesture', 'right');
       // window.history.forward();
       return GestureTypes.Right;
     }
-    console.log("undefined");
+    console.log('undefined');
   }
 
   isGestureButton(e: MouseEvent) {
@@ -164,21 +215,21 @@ export class CGMain {
   }
 
   addDot(e: MouseEvent) {
-    let div = document.createElement("div");
-    div.style.position = "absolute";
-    div.style.left = e.clientX + "px";
-    div.style.top = e.clientY + "px";
-    div.style.width = "3px";
-    div.style.height = "3px";
-    div.style.backgroundColor = e.button == 0 ? "red" : "green";
+    let div = document.createElement('div');
+    div.style.position = 'absolute';
+    div.style.left = e.clientX + 'px';
+    div.style.top = e.clientY + 'px';
+    div.style.width = '3px';
+    div.style.height = '3px';
+    div.style.backgroundColor = e.button == 0 ? 'red' : 'green';
     document.body.appendChild(div);
   }
 
   initIndicatorElement() {
-    this.indicatorElement = document.createElement("div");
+    this.indicatorElement = document.createElement('div');
 
-    this.indicatorElement.id = "chrogestureid";
-    this.indicatorElement.classList.add("chgs-indicator");
+    this.indicatorElement.id = 'chrogestureid';
+    this.indicatorElement.classList.add('chgs-indicator');
 
     this.showIndicator(false);
 
@@ -186,19 +237,17 @@ export class CGMain {
   }
 
   initReadyIndicatorElement() {
-    let el = document.createElement("div");
+    let el = document.createElement('div');
 
-    el.id = "chrogestureready";
-    el.classList.add("ready-indicator");
-    el.innerText = "Gesture ready";
-    el.style.visibility = "hidden";
+    el.id = 'chrogestureready';
+    el.classList.add('ready-indicator');
+    el.innerText = 'Gesture ready';
+    el.style.visibility = 'hidden';
     document.body.appendChild(el);
   }
 
   showIndicator(show: boolean) {
-    show
-      ? (this.indicatorElement.style.visibility = "initial")
-      : (this.indicatorElement.style.visibility = "hidden");
+    show ? (this.indicatorElement.style.visibility = 'initial') : (this.indicatorElement.style.visibility = 'hidden');
   }
 
   printGestures() {
@@ -206,16 +255,16 @@ export class CGMain {
       .map((x) => {
         switch (x) {
           case GestureTypes.Up:
-            return "🔼";
+            return '🔼';
           case GestureTypes.Down:
-            return "🔽";
+            return '🔽';
           case GestureTypes.Left:
-            return "◀";
+            return '◀';
           case GestureTypes.Right:
-            return "▶";
+            return '▶';
         }
       })
-      .join(" ");
+      .join(' ');
   }
   setIFrameMouseEventBorderStyle() {
     // document.querySelectorAll('iframe').forEach((frame: HTMLIFrameElement) => {
