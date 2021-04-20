@@ -1,5 +1,5 @@
-import { fromEvent, merge, concat } from 'rxjs';
-import { switchMap, tap, takeUntil, filter } from 'rxjs/operators';
+import { fromEvent, merge, concat, Observable, timer } from 'rxjs';
+import { switchMap, tap, takeUntil, filter, take } from 'rxjs/operators';
 import { Coordinate } from '../models/coordinate.interface';
 import { MessageTypes } from '../models/message-types.enum';
 import { IBackgroundMessagePayload } from '../models/i-background-message-payload';
@@ -12,11 +12,38 @@ export class CGMain {
   anchorCoordinate: Coordinate;
   currentAnchorTarget: HTMLAnchorElement;
   indicatorElement: HTMLDivElement;
-
+  move$: Observable<MouseEvent>;
   forceOverIFrameState = false;
 
   constructor() {
-    this.initIndicatorElement();
+    this.initMouseGestureDirections();
+
+    this.listenToMouseEvents();
+
+    this.initStorageListeners();
+
+    this.listenToMutationObserver();
+
+    //This should be last once all init and event listening is done
+
+    this.showMessage('Gesture ready');
+  }
+
+  initStorageListeners() {
+    // load from storage setting
+    chrome.storage.sync.get('ForceOverIFrame', (x) => {
+      console.log('this is what i get ForceOverIFrame', x.ForceOverIFrame);
+      this.forceOverIFrameState = x.ForceOverIFrame as boolean;
+    });
+
+    // on popup setting change set iframe accordingly
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      console.log(changes);
+      this.toggleAllIFramePointerEvent(changes?.ForceOverIFrame?.newValue);
+    });
+  }
+
+  listenToMouseEvents() {
     fromEvent(document, 'contextmenu').subscribe((e) => {
       if (this.inGesture) {
         e.preventDefault();
@@ -24,7 +51,7 @@ export class CGMain {
       this.inGesture = false;
     });
 
-    let move$ = fromEvent<MouseEvent>(document, 'mousemove').pipe(
+    this.move$ = fromEvent<MouseEvent>(document, 'mousemove').pipe(
       tap((x) => {
         this.showIndicator(true);
       }),
@@ -65,9 +92,10 @@ export class CGMain {
           this.currentAnchorTarget = this.lookupParentsForAnchor(e);
           console.log('[currentAnchorTarget]', this.currentAnchorTarget, chrome.tabs);
         }),
-        switchMap((e) => move$)
+        switchMap((e) => this.move$)
       )
       .subscribe((e) => {
+        //TODO add options to allow trailing dots on gesture
         // this.addDot(e);
         let currentCoordinate = this.getCoordinate(e);
         if (!this.anchorCoordinate) {
@@ -87,35 +115,33 @@ export class CGMain {
           }
         }
       });
-
-    this.setIFrameMouseEventBorderStyle();
-    this.initReadyIndicatorElement();
-
-    // load from storage setting
-    chrome.storage.sync.get('ForceOverIFrame', (x) => {
-      console.log('this is what i get ForceOverIFrame', x.ForceOverIFrame);
-      this.forceOverIFrameState = x.ForceOverIFrame as boolean;
-    });
-
-    // on popup setting change set iframe accordingly
-    chrome.storage.onChanged.addListener((changes, namespace) => {
-      console.log(changes);
-      this.togglePointerEventNoneToIFrame(changes?.ForceOverIFrame?.newValue);
-    });
-
-    this.listenToMutationObserver();
   }
 
-  togglePointerEventNoneToIFrame(toogleAdd: boolean) {
-    toogleAdd
-      ? document.querySelectorAll('iframe').forEach((iframe) => {
-          iframe.classList.add('pointer-event-none');
-        })
-      : document.querySelectorAll('iframe').forEach((iframe) => {
-          iframe.classList.remove('pointer-event-none');
-        });
+  toggleIFramePointerEvents(element: HTMLElement, toogleAdd: boolean) {
+    toogleAdd ? element.classList.add('pointer-event-none') : element.classList.remove('pointer-event-none');
   }
 
+  disablePointerEventOnClick(element: HTMLElement) {
+    // attach to parentElement because iframe do have event propagation
+    fromEvent(element.parentElement, 'mousedown')
+      .pipe(
+        tap((t) => console.log(t)),
+        filter((click) => (click as MouseEvent).button == 0),
+        take(1)
+      )
+      .subscribe((ev) => {
+        this.toggleIFramePointerEvents((ev.target as HTMLElement).querySelector('iframe'), false);
+        this.showMessage('Enabled IFrame interaction');
+      });
+  }
+
+  toggleAllIFramePointerEvent(toogleAdd: boolean) {
+    document.querySelectorAll('iframe').forEach((iframe) => {
+      this.toggleIFramePointerEvents(iframe, toogleAdd);
+    });
+  }
+
+  // listent to DOM Mutation inorder to enable IFrame event bubbling
   listenToMutationObserver() {
     // Select the node that will be observed for mutations
     const targetNode = document;
@@ -125,25 +151,17 @@ export class CGMain {
 
     // Callback function to execute when mutations are observed
     const callback = (mutationsList: MutationRecord[], observer: MutationObserver) => {
-      // Use traditional 'for loops' for IE 11
-      for (const mutation of mutationsList) {
-        // console.log('Mutation Item', mutation);
-        if (mutation.type === 'childList') {
-          // console.log('A child node has been added or removed.');
-          mutation.addedNodes?.forEach((node) => {
+      mutationsList
+        .filter((mut) => mut.type === 'childList')
+        .forEach((mut) => {
+          mut.addedNodes?.forEach((node) => {
             if (node.nodeName == 'IFRAME') {
               console.log('iframe found added', node);
-              this.togglePointerEventNoneToIFrame(this.forceOverIFrameState);
+              this.toggleIFramePointerEvents(node as HTMLElement, this.forceOverIFrameState);
+              this.disablePointerEventOnClick(node as HTMLElement);
             }
           });
-        }
-        // else if (mutation.type === 'attributes') {
-        //   console.log('The ' + mutation.attributeName + ' attribute was modified.');
-        //   if (mutation.target.nodeName == 'IFRAME') {
-        //     // this.togglePointerEventNoneToIFrame(this.forceOverIFrameState);
-        //   }
-        // }
-      }
+        });
     };
 
     // Create an observer instance linked to the callback function
@@ -225,7 +243,7 @@ export class CGMain {
     document.body.appendChild(div);
   }
 
-  initIndicatorElement() {
+  initMouseGestureDirections() {
     this.indicatorElement = document.createElement('div');
 
     this.indicatorElement.id = 'chrogestureid';
@@ -236,14 +254,17 @@ export class CGMain {
     document.body.appendChild(this.indicatorElement);
   }
 
-  initReadyIndicatorElement() {
+  showMessage(msg: string) {
     let el = document.createElement('div');
 
-    el.id = 'chrogestureready';
-    el.classList.add('ready-indicator');
-    el.innerText = 'Gesture ready';
+    el.id = 'chrogesture-messagebox';
+    el.classList.add('message-box');
+    el.innerText = msg;
     el.style.visibility = 'hidden';
     document.body.appendChild(el);
+    timer(3000).subscribe((x) => {
+      el.remove();
+    });
   }
 
   showIndicator(show: boolean) {
@@ -265,16 +286,5 @@ export class CGMain {
         }
       })
       .join(' ');
-  }
-  setIFrameMouseEventBorderStyle() {
-    // document.querySelectorAll('iframe').forEach((frame: HTMLIFrameElement) => {
-    //   console.log('add iframe style to ', frame);
-    //   frame.addEventListener('mouseenter', (e: MouseEvent) => {
-    //     (e.target as HTMLElement).style.border = '2px solid #ccff00';
-    //   });
-    //   frame.addEventListener('mouseleave', (e: MouseEvent) => {
-    //     (e.target as HTMLElement).style.border = '';
-    //   });
-    // })
   }
 }

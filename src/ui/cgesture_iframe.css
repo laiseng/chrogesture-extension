@@ -1,6 +1,4 @@
 iframe:hover > .chgs-indicator {
-  /* background: #aba9a9;
-  border: 2px solid #aba9a9; */
   visibility: initial;
 }
 
@@ -30,6 +28,27 @@ iframe:hover > .chgs-indicator {
 }
 
 .ready-indicator {
+  position: fixed;
+  width: 230px;
+  line-height: 20px;
+  background-color: rgba(0, 0, 0, 0.85);
+  bottom: 32px;
+  z-index: 9999;
+  border-radius: 16px;
+  opacity: 0.85;
+  font-size: 20px;
+  color: white;
+  padding: 16px 48px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  left: calc(50vw - 115px);
+  box-shadow: 0 5px 5px -3px rgb(0 0 0 / 20%), 0 8px 10px 1px rgb(0 0 0 / 14%), 0 3px 14px 2px rgb(0 0 0 / 12%);
+  animation: readyOut 3s ease-out 1;
+}
+
+.message-box {
   position: fixed;
   width: 230px;
   line-height: 20px;
