@@ -1,5 +1,11 @@
 # Chrome mouse gesture extension
 
+- [Features](#Features)
+- [Installation](#Installation)
+- [Limitation](#LIMITATION)
+- [Releases](#Releases)
+- [Report Bug](#Report-Bug)
+
 I've been using crxMouse for many years and it serves me well but it has gone rouge by sending lots of analytics data back it's server of unknown origin. hence I've decided to build my own.
 
 ## Features
@@ -26,7 +32,7 @@ This has not been published into Chrome Web Store yet because i don't have a Chr
 6. Restart your chrome browser and this Chrogesture-Extension is ready for use.
 7. Done
 
-## LIMITATION
+## Limitation
 
 Because of the limitation with chrome extension APIs, there are several limitation to this extension. below are the list of limitations
 
@@ -50,3 +56,7 @@ Because of the limitation with chrome extension APIs, there are several limitati
 Download latest version below and unzip it to you desired path
 
 - [chrogesture-extension-v0.2.0.zip](/releases/chrogesture-extension-v0.2.0.zip)
+
+## Report Bug
+
+You may report bugs in this GitHub Issues page
