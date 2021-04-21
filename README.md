@@ -18,7 +18,7 @@ It currently only support 5 gestures and fixed command now. Just hold you right 
 
 This has not been published into Chrome Web Store yet because i don't have a Chrome Web Store developer account yet and seems like there is more process of creating end user license agreement and usage policy etc just to publish it. So for now if you need mouse gesture that you can trust just follow below steps
 
-1. Download latest version from [Releases](#Releases)section
+1. Download latest version from [Releases](#Releases) section
 2. unzip it to you desired location
 3. In chrome menu select `More Tools` => `Extensions`
 4. Enable `Developer Mode` switch on top right corner
