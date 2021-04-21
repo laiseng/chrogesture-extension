@@ -1,25 +1,48 @@
+import { merge, combineLatest, fromEvent } from "rxjs";
 import { OptionStorageModel } from "./models/options-storage.model";
 
 export class CgOption {
+  upOpenLinkElement = document.querySelector<HTMLInputElement>("#upopenlink");
+  forceOverIframe = document.querySelector<HTMLInputElement>(
+    "#forceoveriframe"
+  );
   run() {
     chrome.storage.sync.set({
-      UpOpenLink: true
+      UpOpenLink: true,
+      ForceOverIFrame: true,
     } as OptionStorageModel);
-
-
     console.log(document.querySelector("#upopenlink"));
-    document.querySelector("#upopenlink").addEventListener("click", e => {
+
+    merge([
+      fromEvent(this.upOpenLinkElement, "click"),
+      fromEvent(this.forceOverIframe, "click"),
+    ]).subscribe((x) => {
+      console.log("Combined checkbox event", {
+        UpOpenLink: this.upOpenLinkElement.checked,
+        ForceOverIFrame: this.forceOverIframe.checked,
+      });
+
       chrome.storage.sync.set({
-        UpOpenLink: (e.target as HTMLInputElement).checked
+        UpOpenLink: this.upOpenLinkElement.checked,
+        ForceOverIFrame: this.forceOverIframe.checked,
       } as OptionStorageModel);
     });
 
-    chrome.storage.sync.get(o => {
-      console.log("[From Background]", o);
-      (document.querySelector(
-        "#upopenlink"
-      ) as HTMLInputElement).checked = (o as OptionStorageModel).UpOpenLink;
-    });
+    // document.querySelector("#upopenlink").addEventListener("click", (e) => {});
+    // document
+    //   .querySelector("#forceoveriframe")
+    //   .addEventListener("click", (e) => {
+    //     chrome.storage.sync.set({
+    //       ForceOverIFrame: (e.target as HTMLInputElement).checked,
+    //     } as OptionStorageModel);
+    //   });
+
+    // chrome.storage.sync.get((o) => {
+    //   console.log("[From Background]", o);
+    //   (document.querySelector(
+    //     "#upopenlink"
+    //   ) as HTMLInputElement).checked = (o as OptionStorageModel).UpOpenLink;
+    // });
   }
 }
 

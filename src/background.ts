@@ -1,65 +1,60 @@
-import { GestureTypes } from "./models/gesture-types.enum";
-import { IBackgroundMessagePayload } from "./models/i-background-message-payload";
-import { MessageTypes } from "./models/message-types.enum";
-import { GestureCommandTypes } from "./models/gesture-command-types.model";
-import { OptionStorageModel } from "./models/options-storage.model";
+import { GestureTypes } from './models/gesture-types.enum';
+import { IBackgroundMessagePayload } from './models/i-background-message-payload';
+import { MessageTypes } from './models/message-types.enum';
+import { GestureCommandTypes } from './models/gesture-command-types.model';
+import { OptionStorageModel } from './models/options-storage.model';
 
 export class CgBackground {
   enableUpOpenLink = true;
+  enableForceOverIFrame = true;
   openLinkCount = 0;
   constructor() {
     chrome.storage.sync.get((o) => {
-      console.log("[From Background]", o);
+      console.log('[From Background]', o);
       this.enableUpOpenLink = (o as OptionStorageModel).UpOpenLink;
+      this.enableForceOverIFrame = (o as OptionStorageModel).ForceOverIFrame;
     });
 
     chrome.tabs.onActivated.addListener((x) => {
       this.openLinkCount = 0;
     });
+
     chrome.storage.onChanged.addListener((changes, namespace) => {
       for (var key in changes) {
         var storageChange = changes[key];
         console.log(
-          'Storage key "%s" in namespace "%s" changed. ' +
-            'Old value was "%s", new value is "%s".',
+          'Storage key "%s" in namespace "%s" changed. ' + 'Old value was "%s", new value is "%s".',
           key,
           namespace,
           storageChange.oldValue,
           storageChange.newValue
         );
-        console.log("[From Background OnChange]", changes["UpOpenLink"]);
-        this.enableUpOpenLink = changes["UpOpenLink"].newValue;
+        console.log('[From Background OnChange]', changes['UpOpenLink']);
+        this.enableUpOpenLink = changes['UpOpenLink'].newValue;
       }
     });
   }
 
   run() {
-    chrome.runtime.onMessage.addListener(
-      (message: IBackgroundMessagePayload, sender, sendResponse: Function) => {
-        let detectedCommand = this.detectGestureCommand(message);
-        this.exeGesture(detectedCommand, message, sender, sendResponse);
-      }
-    );
+    chrome.runtime.onMessage.addListener((message: IBackgroundMessagePayload, sender, sendResponse: Function) => {
+      let detectedCommand = this.detectGestureCommand(message);
+      this.exeGesture(detectedCommand, message, sender, sendResponse);
+    });
   }
 
-  exeGesture(
-    command: GestureCommandTypes,
-    message: IBackgroundMessagePayload,
-    sender,
-    sendResponse: Function
-  ) {
+  exeGesture(command: GestureCommandTypes, message: IBackgroundMessagePayload, sender, sendResponse: Function) {
     switch (command) {
       case GestureCommandTypes.CloseTab:
         chrome.tabs.remove(sender.tab.id);
         break;
       case GestureCommandTypes.HistoryBack:
-        chrome.tabs.executeScript(null, { code: "window.history.back()" });
+        chrome.tabs.executeScript(null, { code: 'window.history.back()' });
         break;
       case GestureCommandTypes.HistoryForward:
-        chrome.tabs.executeScript(null, { code: "window.history.forward()" });
+        chrome.tabs.executeScript(null, { code: 'window.history.forward()' });
         break;
       case GestureCommandTypes.NewEmptyTab:
-        chrome.tabs.create({ url: "chrome://newtab" });
+        chrome.tabs.create({ url: 'chrome://newtab' });
         break;
       case GestureCommandTypes.OpenLinkInBackground:
         chrome.tabs.query({ active: true }, (tabs) => {
@@ -76,27 +71,17 @@ export class CgBackground {
     }
   }
 
-  detectGestureCommand(
-    payload: IBackgroundMessagePayload
-  ): GestureCommandTypes {
+  detectGestureCommand(payload: IBackgroundMessagePayload): GestureCommandTypes {
     if (this.arraysEqual(payload.gestures, [GestureTypes.Down])) {
       return GestureCommandTypes.CloseTab;
     }
 
-    if (
-      this.arraysEqual(payload.gestures, [GestureTypes.Up]) &&
-      payload.type == MessageTypes.Gesture
-    ) {
+    if (this.arraysEqual(payload.gestures, [GestureTypes.Up]) && payload.type == MessageTypes.Gesture) {
       return GestureCommandTypes.NewEmptyTab;
     }
 
-    if (
-      this.arraysEqual(payload.gestures, [GestureTypes.Up]) &&
-      payload.type == MessageTypes.Url
-    ) {
-      return this.enableUpOpenLink
-        ? GestureCommandTypes.OpenLinkInBackground
-        : GestureCommandTypes.NewEmptyTab;
+    if (this.arraysEqual(payload.gestures, [GestureTypes.Up]) && payload.type == MessageTypes.Url) {
+      return this.enableUpOpenLink ? GestureCommandTypes.OpenLinkInBackground : GestureCommandTypes.NewEmptyTab;
     }
 
     if (this.arraysEqual(payload.gestures, [GestureTypes.Left])) {
@@ -106,9 +91,7 @@ export class CgBackground {
     if (this.arraysEqual(payload.gestures, [GestureTypes.Right])) {
       return GestureCommandTypes.HistoryForward;
     }
-    if (
-      this.arraysEqual(payload.gestures, [GestureTypes.Up, GestureTypes.Down])
-    ) {
+    if (this.arraysEqual(payload.gestures, [GestureTypes.Up, GestureTypes.Down])) {
       return GestureCommandTypes.UndoCloseTab;
     }
   }
