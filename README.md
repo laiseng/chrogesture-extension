@@ -1,3 +1,7 @@
+[<img src="assets/chrom-web-store-logo.png" alt="angular-logo" />](https://chrome.google.com/webstore/detail/chrogesture-extension/cgoppdmnkpkomnommdffmaeckjomoebo)
+
+[**Install Chrogesture Extension**](https://chrome.google.com/webstore/detail/chrogesture-extension/cgoppdmnkpkomnommdffmaeckjomoebo)
+
 # Chrome mouse gesture extension
 
 - [Features](#Features)
@@ -22,15 +26,11 @@ It currently only support 5 gestures and fixed command now. Just hold you right 
 
 ## Installation
 
-This has not been published into Chrome Web Store yet because i don't have a Chrome Web Store developer account yet and seems like there is more process of creating end user license agreement and usage policy etc just to publish it. So for now if you need mouse gesture that you can trust just follow below steps
+Head to **Chrome Web Store** and install it at:-
 
-1. Download latest version from [Releases](#Releases) section
-2. unzip it to you desired location
-3. In chrome menu select `More Tools` => `Extensions`
-4. Enable `Developer Mode` switch on top right corner
-5. Click `Load Unpacked` and browse to the unzipped chrogesture-extension `dist` folder
-6. Restart your chrome browser and this Chrogesture-Extension is ready for use.
-7. Done
+[<img src="assets/chrom-web-store-logo.png" alt="angular-logo" />](https://chrome.google.com/webstore/detail/chrogesture-extension/cgoppdmnkpkomnommdffmaeckjomoebo)
+
+[Chrogesture Extension](https://chrome.google.com/webstore/detail/chrogesture-extension/cgoppdmnkpkomnommdffmaeckjomoebo)
 
 ## Limitation
 
