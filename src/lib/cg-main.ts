@@ -4,6 +4,7 @@ import { Coordinate } from '../models/coordinate.interface';
 import { MessageTypes } from '../models/message-types.enum';
 import { IBackgroundMessagePayload } from '../models/i-background-message-payload';
 import { GestureTypes } from '../models/gesture-types.enum';
+import { StorageUtil } from './storage';
 
 const MIN_LENGTH = 10;
 export class CGMain {
@@ -29,12 +30,10 @@ export class CGMain {
     this.showMessage('Gesture ready');
   }
 
-  initStorageListeners() {
+  async initStorageListeners() {
     // load from storage setting
-    chrome.storage.sync.get('ForceOverIFrame', (x) => {
-      console.log('this is what i get ForceOverIFrame', x.ForceOverIFrame);
-      this.forceOverIFrameState = x.ForceOverIFrame as boolean;
-    });
+    this.forceOverIFrameState = await StorageUtil.getSyncValue<boolean>('ForceOverIFrame');
+    console.log('this is what i get ForceOverIFrame', this.forceOverIFrameState);
 
     // on popup setting change set iframe accordingly
     chrome.storage.onChanged.addListener((changes, namespace) => {
