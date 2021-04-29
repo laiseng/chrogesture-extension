@@ -55,6 +55,7 @@ Because of the limitation with chrome extension APIs, there are several limitati
 
 Download latest version below and unzip it to you desired path
 
+- [chrogesture-extension-v0.2.1.zip](/releases/chrogesture-extension-v0.2.0.zip) _latest_
 - [chrogesture-extension-v0.2.0.zip](/releases/chrogesture-extension-v0.2.0.zip)
 
 ## Report Bug
