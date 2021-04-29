@@ -1,21 +1,13 @@
 import { fromEvent, merge } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { StorageUtil } from './lib/storage';
 import { OptionStorageModel } from './models/options-storage.model';
 
 export class CgPopup {
   upOpenLinkElement = document.querySelector<HTMLInputElement>('#upopenlink');
   forceOverIframe = document.querySelector<HTMLInputElement>('#forceoveriframe');
-  run() {
-    chrome.storage.sync.get('UpOpenLink', (x) => {
-      console.log('this is what i get UpOpenLink', x.UpOpenLink);
-      this.upOpenLinkElement.checked = x.UpOpenLink as boolean;
-    });
-
-    chrome.storage.sync.get('ForceOverIFrame', (x) => {
-      console.log('this is what i get ForceOverIFrame', x.ForceOverIFrame);
-      this.forceOverIframe.checked = x.ForceOverIFrame as boolean;
-    });
-
+  async run() {
+    await this.checkForStorageOptions();
     merge(fromEvent(this.upOpenLinkElement, 'click'), fromEvent(this.forceOverIframe, 'click'))
       .pipe(
         tap((tapitem) => {
@@ -34,6 +26,32 @@ export class CgPopup {
         } as OptionStorageModel);
       });
   }
+
+  async checkForStorageOptions() {
+    //set default value
+    this.upOpenLinkElement.checked = await StorageUtil.getSyncValue<boolean>('UpOpenLink');
+    if (this.upOpenLinkElement.checked == undefined) {
+      this.upOpenLinkElement.checked = true;
+      chrome.storage.sync.set({ UpOpenLink: this.upOpenLinkElement.checked });
+    }
+
+    //set default value
+    this.forceOverIframe.checked = await StorageUtil.getSyncValue<boolean>('ForceOverIFrame');
+    if (this.forceOverIframe.checked == undefined) {
+      this.forceOverIframe.checked = true;
+      chrome.storage.sync.set({ UpOpenLink: true });
+    }
+    console.log('this is what i get UpOpenLink', this.upOpenLinkElement.checked);
+    console.log('this is what i get ForceOverIFrame', this.forceOverIframe.checked);
+  }
 }
+
 let options = new CgPopup();
-options.run();
+options
+  .run()
+  .then(() => {
+    console.log('Popup run completed');
+  })
+  .catch((err) => {
+    console.log('Popup run with error:', err);
+  });
