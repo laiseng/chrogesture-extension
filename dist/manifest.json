@@ -3,13 +3,18 @@
 
   "name": "Chrogesture Extension",
   "description": "Use mouse gesture to trigger browser command.",
-  "version": "0.2.1",
+  "version": "0.2.2",
 
   "options_ui": {
     "page": "ui/options.html",
     "chrome_style": true
   },
-
+  "icons": {
+    "16": "ui/icon28.png",
+    "48": "ui/icon.png",
+    "128": "ui/icon128.png",
+    "256": "ui/icon512.png"
+  },
   "browser_action": {
     "default_icon": "ui/icon.png",
     "default_popup": "ui/popup.html"
