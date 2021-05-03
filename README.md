@@ -62,3 +62,7 @@ Download latest version below and unzip it to you desired path
 ## Report Bug
 
 You may report bugs in this GitHub Issues page
+
+## Credit
+
+thanks to https://github.com/chibat/chrome-extension-typescript-starter.git for providing the starter repo that already scaffolded the necessary packages to start coding this extension that save me a lot of time.
