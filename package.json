@@ -1,7 +1,7 @@
 {
-  "name": "chrome-extension-typescript-starter",
+  "name": "chrogesture-extension",
   "version": "0.1.1",
-  "description": "chrome-extension-typescript-starter",
+  "description": "chrogesture extension",
   "main": "index.js",
   "scripts": {
     "watch": "webpack --config webpack/webpack.dev.js --watch",
@@ -11,7 +11,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chibat/chrome-extension-typescript-starter.git"
+    "url": "https://github.com/laiseng/chrogesture-extension.git"
   },
   "dependencies": {
     "@types/webpack": "^5.28.0",
