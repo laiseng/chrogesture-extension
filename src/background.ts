@@ -3,7 +3,6 @@ import { IBackgroundMessagePayload } from './models/i-background-message-payload
 import { MessageTypes } from './models/message-types.enum';
 import { GestureCommandTypes } from './models/gesture-command-types.model';
 import { OptionStorageModel } from './models/options-storage.model';
-
 export class CgBackground {
   enableUpOpenLink = true;
   enableForceOverIFrame = true;

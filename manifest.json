@@ -1,36 +1,40 @@
 {
-  "manifest_version": 2,
-
+  "manifest_version": 3,
   "name": "Chrogesture Extension",
   "description": "Use mouse gesture to trigger browser command.",
-  "version": "0.2.2",
+  "version": "0.3.2",
 
-  "options_ui": {
-    "page": "ui/options.html",
-    "chrome_style": true
+  "options_page": "ui/options.html",
+  "permissions": ["storage", "tabs", "history", "sessions"],
+
+  "web_accessible_resources": [
+    {
+      "matches": ["*://*/*"],
+      "resources": ["image/*", "js/*", "icon.png", "html/notifi.html", "options.html", "fonts/*", "css/"]
+    }
+  ],
+
+  "action": {
+    "default_popup": "ui/hw.html",
+    "default_title": "chrogesture"
   },
+
+  "content_scripts": [
+    {
+      "all_frames": true,
+      "css": ["ui/cgesture_iframe.css"],
+      "js": ["js/vendor.js", "js/content_script.js"],
+      "matches": ["<all_urls>"],
+      "run_at": "document_start"
+    }
+  ],
+
+  "host_permissions": ["http://*/*", "https://*/*"],
+
   "icons": {
     "16": "ui/icon28.png",
     "48": "ui/icon.png",
     "128": "ui/icon128.png",
     "256": "ui/icon512.png"
-  },
-  "browser_action": {
-    "default_icon": "ui/icon.png",
-    "default_popup": "ui/popup.html"
-  },
-
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["js/vendor.js", "js/content_script.js"],
-      "css": ["ui/cgesture_iframe.css"]
-    }
-  ],
-
-  "background": {
-    "scripts": ["js/vendor.js", "js/background.js"]
-  },
-
-  "permissions": ["storage", "tabs", "history", "sessions", "http://*/*", "https://*/*"]
+  }
 }
