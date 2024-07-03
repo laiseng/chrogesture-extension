@@ -1,10 +1,10 @@
 {
   "extensionDescription": {
-    "description": "Extension description",
-    "message": "Chrome extension boilerplate developed with Vite, React and Typescript"
+    "description": "Chrome gesture extension utility tool",
+    "message": "Chrome gesture extension utility tool"
   },
   "extensionName": {
-    "description": "Extension name",
-    "message": "Chrome extension boilerplate"
+    "description": "chrogesture extension",
+    "message": "Chrome gesture extension utility tool"
   }
 }

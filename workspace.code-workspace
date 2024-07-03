@@ -5,6 +5,9 @@
 	},
 	{
 		"path": "build"
+	},
+	{
+		"path": "ng-chrogesture"
 	}
 ],
   "settings": {

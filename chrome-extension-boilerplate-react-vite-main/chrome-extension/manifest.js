@@ -23,7 +23,7 @@ const manifest = Object.assign(
      * if you want to support multiple languages, you can use the following reference
      * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Internationalization
      */
-    name: '__MSG_extensionName__',
+    name: 'chrogesture extension',
     version: packageJson.version,
     description: '__MSG_extensionDescription__',
     permissions: ['storage'].concat(sidePanelConfig.permissions),
