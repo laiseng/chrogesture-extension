@@ -1,4 +1,5 @@
 export enum GestureCommandTypes {
+  None,
   NewEmptyTab,
   CloseTab,
   HistoryBack,

@@ -32,7 +32,12 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/manifest.json"
+              "src/manifest.json", 
+               {
+                "glob": "**/*",
+                "input": "src/extension/ui/",
+                "output": "/ui/"
+              }
             ],
             "styles": [
               "src/styles.scss"

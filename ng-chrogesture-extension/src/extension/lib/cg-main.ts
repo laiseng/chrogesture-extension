@@ -5,15 +5,15 @@ import { MessageTypes } from '../models/message-types.enum';
 import { IBackgroundMessagePayload } from '../models/i-background-message-payload';
 import { GestureTypes } from '../models/gesture-types.enum';
 import { StorageUtil } from './storage';
-import { Nullable } from '../types';
+import { Nullable } from './types';
 
 const MIN_LENGTH = 10;
 export class CGMain {
   inGesture = false;
   gestures: GestureTypes[] = [];
-  anchorCoordinate: Nullable<Coordinate>=null;
-  currentAnchorTarget : Nullable<HTMLAnchorElement>=null;
-  indicatorElement!:Nullable< HTMLDivElement>=null;
+  anchorCoordinate: Nullable<Coordinate> = null;
+  currentAnchorTarget: Nullable<HTMLAnchorElement> = null;
+  indicatorElement: Nullable<HTMLDivElement> = null;
   move$!: Observable<MouseEvent>;
   forceOverIFrameState = false;
 
@@ -117,13 +117,13 @@ export class CGMain {
       });
   }
 
-  toggleIFramePointerEvents(element: Node, toogleAdd: boolean) {
-    toogleAdd ? element.firstChild?.classList.add('pointer-event-none') : element.classList.remove('pointer-event-none');
+  toggleIFramePointerEvents(element: Nullable<HTMLElement>, toogleAdd: boolean) {
+    if (element) toogleAdd ? element.classList.add('pointer-event-none') : element.classList.remove('pointer-event-none');
   }
 
   disablePointerEventOnClick(element: Node) {
     // attach to parentElement because iframe do have event propagation
-    fromEvent(element.parentElement, 'mousedown')
+    fromEvent(element as HTMLElement, 'mousedown')
       .pipe(
         tap((t) => console.log(t)),
         filter((click) => (click as MouseEvent).button == 0),
@@ -157,7 +157,7 @@ export class CGMain {
           mut.addedNodes?.forEach((node) => {
             if (node.nodeName == 'IFRAME') {
               console.log('iframe found added', node);
-              this.toggleIFramePointerEvents(node, this.forceOverIFrameState);
+              this.toggleIFramePointerEvents(node as HTMLElement, this.forceOverIFrameState);
               this.disablePointerEventOnClick(node);
             }
           });
@@ -219,7 +219,8 @@ export class CGMain {
       // window.history.forward();
       return GestureTypes.Right;
     }
-    console.log('undefined');
+
+    return null;
   }
 
   isGestureButton(e: MouseEvent) {
@@ -268,23 +269,25 @@ export class CGMain {
   }
 
   showIndicator(show: boolean) {
-    show ? (this.indicatorElement.style.visibility = 'initial') : (this.indicatorElement.style.visibility = 'hidden');
+    if (this.indicatorElement) this.indicatorElement.style.visibility = show ? 'initial' : 'hidden';
   }
 
   printGestures() {
-    this.indicatorElement.innerText = this.gestures
-      .map((x) => {
-        switch (x) {
-          case GestureTypes.Up:
-            return '🔼';
-          case GestureTypes.Down:
-            return '🔽';
-          case GestureTypes.Left:
-            return '◀';
-          case GestureTypes.Right:
-            return '▶';
-        }
-      })
-      .join(' ');
+    if (this.indicatorElement) {
+      this.indicatorElement.innerText = this.gestures
+        .map((x) => {
+          switch (x) {
+            case GestureTypes.Up:
+              return '🔼';
+            case GestureTypes.Down:
+              return '🔽';
+            case GestureTypes.Left:
+              return '◀';
+            case GestureTypes.Right:
+              return '▶';
+          }
+        })
+        .join(' ');
+    }
   }
 }

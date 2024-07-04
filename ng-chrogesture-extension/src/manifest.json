@@ -1,19 +1,22 @@
 {
-  "name": "Great Extension",
-  "version": "1.0",
-  "description": "Build an Extension with Angular",
+  "name": "Chrogesture Extension",
+  "version": "0.5.0",
+  "description": "Use mouse gesture to trigger browser command.",
   "manifest_version": 3,
-  "permissions": [
-      "activeTab",
-      "webNavigation",
-      "storage",
-      "scripting"
-  ],
+  "permissions": ["activeTab", "webNavigation", "storage", "scripting", "sessions"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
   "action": {
-      "default_popup": "index.html"
-  }
+    "default_popup": "ui/popup.html",
+    "default_icon": "ui/icon48.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "<all_urls>"],
+      "css": ["ui/cgesture_iframe.css"],
+      "js": ["content_script.js"]
+    }
+  ]
 }
