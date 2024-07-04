@@ -5,15 +5,16 @@ import { MessageTypes } from '../models/message-types.enum';
 import { IBackgroundMessagePayload } from '../models/i-background-message-payload';
 import { GestureTypes } from '../models/gesture-types.enum';
 import { StorageUtil } from './storage';
+import { Nullable } from '../types';
 
 const MIN_LENGTH = 10;
 export class CGMain {
   inGesture = false;
   gestures: GestureTypes[] = [];
-  anchorCoordinate: Coordinate;
-  currentAnchorTarget: HTMLAnchorElement;
-  indicatorElement: HTMLDivElement;
-  move$: Observable<MouseEvent>;
+  anchorCoordinate: Nullable<Coordinate>=null;
+  currentAnchorTarget : Nullable<HTMLAnchorElement>=null;
+  indicatorElement!:Nullable< HTMLDivElement>=null;
+  move$!: Observable<MouseEvent>;
   forceOverIFrameState = false;
 
   constructor() {
@@ -116,11 +117,11 @@ export class CGMain {
       });
   }
 
-  toggleIFramePointerEvents(element: HTMLElement, toogleAdd: boolean) {
-    toogleAdd ? element.classList.add('pointer-event-none') : element.classList.remove('pointer-event-none');
+  toggleIFramePointerEvents(element: Node, toogleAdd: boolean) {
+    toogleAdd ? element.firstChild?.classList.add('pointer-event-none') : element.classList.remove('pointer-event-none');
   }
 
-  disablePointerEventOnClick(element: HTMLElement) {
+  disablePointerEventOnClick(element: Node) {
     // attach to parentElement because iframe do have event propagation
     fromEvent(element.parentElement, 'mousedown')
       .pipe(
@@ -156,8 +157,8 @@ export class CGMain {
           mut.addedNodes?.forEach((node) => {
             if (node.nodeName == 'IFRAME') {
               console.log('iframe found added', node);
-              this.toggleIFramePointerEvents(node as HTMLElement, this.forceOverIFrameState);
-              this.disablePointerEventOnClick(node as HTMLElement);
+              this.toggleIFramePointerEvents(node, this.forceOverIFrameState);
+              this.disablePointerEventOnClick(node);
             }
           });
         });

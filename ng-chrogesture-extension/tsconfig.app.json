@@ -8,10 +8,10 @@
   "files": [
     "src/main.ts",
     "src/polyfills.ts",
-    "src/chrome-extensions/background.ts",
-    "src/chrome-extensions/content_script.ts",
-    "src/chrome-extensions/options.ts",
-    "src/chrome-extensions/popup.ts"
+    "src/extension/background.ts",
+    "src/extension/content_script.ts",
+    "src/extension/options.ts",
+    "src/extension/popup.ts"
   ],
   "include": ["src/**/*.d.ts"]
 }

@@ -12,7 +12,7 @@ export class StorageUtil {
     });
   }
 
-  static settSyncValue(setVal: unknown) {
+  static settSyncValue(setVal: Record<string,any>) {
     chrome.storage.sync.set(setVal);
   }
 }
