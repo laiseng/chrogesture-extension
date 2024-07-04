@@ -1,0 +1,17 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": ["chrome"]
+  },
+  "files": [
+    "src/main.ts",
+    "src/polyfills.ts",
+    "src/chrome-extensions/background.ts",
+    "src/chrome-extensions/content_script.ts",
+    "src/chrome-extensions/options.ts",
+    "src/chrome-extensions/popup.ts"
+  ],
+  "include": ["src/**/*.d.ts"]
+}
